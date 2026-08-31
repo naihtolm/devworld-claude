@@ -1,0 +1,10 @@
+node_modules
+.next
+.env
+.env.local
+.env*.local
+db/migrations
+.DS_Store
+*.log
+.claude/scheduled_tasks.lock
+migrate-ai-folders.ps1
