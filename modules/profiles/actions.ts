@@ -202,6 +202,56 @@ export async function addPortfolioItem(formData: FormData) {
   revalidatePath(`/developers/${profile.id}`);
 }
 
+const githubRepoSchema = z.object({
+  name: z.string().trim().min(1).max(150),
+  description: z.string().trim().max(2000).optional(),
+  language: z.string().trim().max(50).optional(),
+  url: z.string().trim().max(2000),
+});
+
+// Each checked repo's data travels as a JSON string in its checkbox value
+// (see modules/profiles/github.ts) — no extra GitHub API round-trip needed,
+// and no elevated trust concern since a developer can already freely type
+// any title/description into a portfolio item via addPortfolioItem above.
+export async function importGitHubRepos(formData: FormData) {
+  const user = await requireCurrentDbUser();
+  const profile = await ensureDeveloperProfile(user.id);
+
+  const raw = formData.getAll("repos");
+  const items = raw
+    .map((r) => {
+      try {
+        return githubRepoSchema.parse(JSON.parse(String(r)));
+      } catch {
+        return null;
+      }
+    })
+    .filter((r): r is z.infer<typeof githubRepoSchema> => r !== null);
+
+  if (items.length === 0) return;
+
+  const existing = await db
+    .select({ repoUrl: portfolioItems.repoUrl })
+    .from(portfolioItems)
+    .where(eq(portfolioItems.developerProfileId, profile.id));
+  const existingUrls = new Set(existing.map((e) => e.repoUrl));
+
+  const toInsert = items.filter((r) => !existingUrls.has(r.url));
+  if (toInsert.length > 0) {
+    await db.insert(portfolioItems).values(
+      toInsert.map((r) => ({
+        developerProfileId: profile.id,
+        title: r.name,
+        description: r.description,
+        technologies: r.language ? [r.language] : [],
+        repoUrl: r.url,
+      }))
+    );
+  }
+
+  revalidatePath(`/developers/${profile.id}`);
+}
+
 export async function deletePortfolioItem(portfolioItemId: string) {
   const user = await requireCurrentDbUser();
   const profile = await ensureDeveloperProfile(user.id);
