@@ -9,3 +9,6 @@ db/migrations
 .claude/scheduled_tasks.lock
 migrate-ai-folders.ps1
 *.tsbuildinfo
+
+.vercel
+.env*

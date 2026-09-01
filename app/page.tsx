@@ -4,6 +4,12 @@ import { db } from "@/db";
 import { projects, developerProfiles, agreements } from "@/db/schema";
 import { CATEGORIES } from "@/modules/marketplace/categories";
 
+// Live counts, not something to freeze at build time — also sidesteps
+// Next.js attempting to statically prerender this against the database
+// during the Vercel build step, where a slow/misconfigured DB connection
+// can hang the whole build rather than just a request.
+export const dynamic = "force-dynamic";
+
 const CATEGORY_ICONS: Record<string, string> = {
   "Web Development": "🌐",
   "Mobile Development": "📱",

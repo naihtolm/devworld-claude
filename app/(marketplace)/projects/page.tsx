@@ -10,6 +10,13 @@ import { Button } from "@/modules/ui/Button";
 // URL (a plain GET form) rather than client state, so results stay
 // server-rendered, bookmarkable, and shareable. Don't reach for
 // Meilisearch/Algolia before this is actually slow.
+//
+// Explicit force-dynamic (searchParams usage already implies this, but
+// being explicit avoids relying on that inference — see app/page.tsx for
+// why: a page hitting the database shouldn't be a candidate for Next.js's
+// build-time static generation at all).
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage({
   searchParams,
 }: {
