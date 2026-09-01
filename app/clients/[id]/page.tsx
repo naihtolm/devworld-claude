@@ -8,6 +8,7 @@ import { ensureCurrentUser } from "@/modules/auth/user";
 import { getTrustSignal } from "@/modules/reviews/trust";
 import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { Avatar } from "@/modules/profiles/Avatar";
+import { ReportForm } from "@/modules/admin/ReportForm";
 
 export default async function ClientProfilePage({
   params,
@@ -83,6 +84,12 @@ export default async function ClientProfilePage({
           </ul>
         )}
       </div>
+
+      {currentUser && !isOwner && (
+        <div className="mt-6">
+          <ReportForm targetType="user" targetId={profile.userId} label="Report this user" />
+        </div>
+      )}
     </main>
   );
 }

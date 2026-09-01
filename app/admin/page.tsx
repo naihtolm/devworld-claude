@@ -26,7 +26,12 @@ export default async function AdminDashboard() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Admin — Disputes</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Admin — Disputes</h1>
+        <Link href="/admin/reports" className="text-sm text-brand-600 underline">
+          Reports →
+        </Link>
+      </div>
 
       {rows.length === 0 ? (
         <p className="text-neutral-500">No disputes.</p>

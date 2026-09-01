@@ -12,6 +12,7 @@ import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { Avatar } from "@/modules/profiles/Avatar";
 import { sendInvitation } from "@/modules/proposals/actions";
 import { Button } from "@/modules/ui/Button";
+import { ReportForm } from "@/modules/admin/ReportForm";
 
 export default async function DeveloperProfilePage({
   params,
@@ -226,6 +227,12 @@ export default async function DeveloperProfilePage({
         )}
         {isOwner && <AddPortfolioItemForm />}
       </div>
+
+      {currentUser && !isOwner && (
+        <div className="mt-6">
+          <ReportForm targetType="user" targetId={profile.userId} label="Report this user" />
+        </div>
+      )}
     </main>
   );
 }

@@ -16,6 +16,7 @@ import {
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
 import { LinkButton } from "@/modules/ui/Button";
+import { ReportForm } from "@/modules/admin/ReportForm";
 
 export default async function ProjectDetailPage({
   params,
@@ -162,6 +163,12 @@ export default async function ProjectDetailPage({
             <LinkButton href="/sign-in">Sign in to submit a proposal</LinkButton>
           )}
         </>
+      )}
+
+      {currentUser && !isOwner && (
+        <div className="mt-6">
+          <ReportForm targetType="project" targetId={project.id} label="Report this project" />
+        </div>
       )}
     </main>
   );
