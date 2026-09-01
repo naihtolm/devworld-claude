@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { invitations, developerProfiles, projects, users, clientProfiles } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { acceptInvitation, declineInvitation } from "@/modules/proposals/actions";
-import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
 import { Button } from "@/modules/ui/Button";
 

@@ -218,7 +218,7 @@ export async function acceptInvitation(invitationId: string) {
 }
 
 export async function declineInvitation(invitationId: string) {
-  const { invitation } = await requireInvitationOwner(invitationId);
+  await requireInvitationOwner(invitationId);
   await db.update(invitations).set({ status: "declined" }).where(eq(invitations.id, invitationId));
   revalidatePath("/invitations");
 }

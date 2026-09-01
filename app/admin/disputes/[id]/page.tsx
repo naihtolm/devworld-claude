@@ -7,7 +7,6 @@ import {
   disputes,
   agreements,
   projects,
-  developerProfiles,
   users,
   milestones,
   conversations,
@@ -40,9 +39,6 @@ export default async function DisputeDetailPage({
   const [agreement] = await db.select().from(agreements).where(eq(agreements.id, dispute.agreementId));
   const [project] = agreement
     ? await db.select().from(projects).where(eq(projects.id, agreement.projectId))
-    : [];
-  const [developer] = agreement
-    ? await db.select().from(developerProfiles).where(eq(developerProfiles.id, agreement.developerProfileId))
     : [];
   const [milestone] = dispute.milestoneId
     ? await db.select().from(milestones).where(eq(milestones.id, dispute.milestoneId))
