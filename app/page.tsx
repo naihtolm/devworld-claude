@@ -22,23 +22,30 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export default async function HomePage() {
-  const [[{ activeProjects }], [{ developers }], [{ completed }], categoryCounts, recentProjects] =
-    await Promise.all([
-      db.select({ activeProjects: count() }).from(projects).where(eq(projects.status, "published")),
-      db.select({ developers: count() }).from(developerProfiles),
-      db.select({ completed: count() }).from(agreements).where(eq(agreements.status, "completed")),
-      db
-        .select({ category: projects.category, count: count() })
-        .from(projects)
-        .where(eq(projects.status, "published"))
-        .groupBy(projects.category),
-      db
-        .select()
-        .from(projects)
-        .where(eq(projects.status, "published"))
-        .orderBy(desc(projects.createdAt))
-        .limit(4),
-    ]);
+  // Sequential, not Promise.all — the pooled connection is a single socket
+  // (max: 1), and firing several queries at once against a fresh serverless
+  // connection here reproducibly hung in production (Vercel) even though it
+  // worked locally; awaiting one at a time is the tradeoff that avoids it.
+  const [{ activeProjects }] = await db
+    .select({ activeProjects: count() })
+    .from(projects)
+    .where(eq(projects.status, "published"));
+  const [{ developers }] = await db.select({ developers: count() }).from(developerProfiles);
+  const [{ completed }] = await db
+    .select({ completed: count() })
+    .from(agreements)
+    .where(eq(agreements.status, "completed"));
+  const categoryCounts = await db
+    .select({ category: projects.category, count: count() })
+    .from(projects)
+    .where(eq(projects.status, "published"))
+    .groupBy(projects.category);
+  const recentProjects = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.status, "published"))
+    .orderBy(desc(projects.createdAt))
+    .limit(4);
 
   const countByCategory = new Map(categoryCounts.map((c) => [c.category, c.count]));
 
