@@ -10,6 +10,7 @@ import { db } from "@/db";
 import { agreements, developerProfiles, milestones, payments } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { getStripe, PLATFORM_FEE_BPS, payoutToDeveloper } from "@/modules/payments/stripe";
+import { dollarsToCents, calculateFeeCents, centsToDollarString } from "@/modules/payments/fees";
 
 async function requireCurrentDbUser() {
   const { userId: authProviderId } = await auth();
@@ -96,8 +97,8 @@ async function createFundingCheckout({
   origin: string;
 }) {
   const stripe = getStripe();
-  const amountCents = Math.round(Number(amount) * 100);
-  const platformFeeCents = Math.round((amountCents * PLATFORM_FEE_BPS) / 10000);
+  const amountCents = dollarsToCents(amount);
+  const platformFeeCents = calculateFeeCents(amount, PLATFORM_FEE_BPS);
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -162,7 +163,7 @@ export async function fundMilestone(milestoneId: string) {
     milestoneId: milestone.id,
     type: "milestone_funding",
     amount: milestone.amount,
-    platformFeeAmount: (platformFeeCents / 100).toFixed(2),
+    platformFeeAmount: centsToDollarString(platformFeeCents),
     status: "pending",
   });
 
@@ -233,7 +234,7 @@ export async function approveMilestone(milestoneId: string) {
     .select()
     .from(payments)
     .where(eq(payments.milestoneId, milestoneId));
-  const platformFeeCents = Math.round(Number(fundingPayment?.platformFeeAmount ?? 0) * 100);
+  const platformFeeCents = dollarsToCents(fundingPayment?.platformFeeAmount ?? 0);
 
   const { transfer, payoutAmount } = await payoutToDeveloper({
     developerStripeAccountId: developerProfile.stripeAccountId,
@@ -341,7 +342,7 @@ export async function payHourlyInvoice(paymentId: string) {
 
   await db
     .update(payments)
-    .set({ platformFeeAmount: (platformFeeCents / 100).toFixed(2) })
+    .set({ platformFeeAmount: centsToDollarString(platformFeeCents) })
     .where(eq(payments.id, paymentId));
 
   redirect(session.url!);

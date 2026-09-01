@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { calculatePayoutCents, centsToDollarString } from "@/modules/payments/fees";
 
 let stripe: Stripe | null = null;
 
@@ -38,8 +39,7 @@ export async function payoutToDeveloper({
   transferGroup: string;
 }) {
   const stripe = getStripe();
-  const amountCents = Math.round(Number(amount) * 100);
-  const payoutCents = amountCents - platformFeeCents;
+  const payoutCents = calculatePayoutCents(amount, platformFeeCents);
 
   const transfer = await stripe.transfers.create({
     amount: payoutCents,
@@ -48,5 +48,5 @@ export async function payoutToDeveloper({
     transfer_group: transferGroup,
   });
 
-  return { transfer, payoutAmount: (payoutCents / 100).toFixed(2) };
+  return { transfer, payoutAmount: centsToDollarString(payoutCents) };
 }

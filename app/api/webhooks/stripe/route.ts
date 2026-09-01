@@ -2,6 +2,7 @@ import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
 import { payments, milestones, developerProfiles, agreements } from "@/db/schema";
 import { getStripe, payoutToDeveloper } from "@/modules/payments/stripe";
+import { dollarsToCents } from "@/modules/payments/fees";
 import type Stripe from "stripe";
 
 // Stripe (not the client) is the source of truth for payment status — see
@@ -65,7 +66,7 @@ export async function POST(req: Request) {
             : [];
 
           if (developerProfile?.stripeAccountId) {
-            const platformFeeCents = Math.round(Number(payment.platformFeeAmount ?? 0) * 100);
+            const platformFeeCents = dollarsToCents(payment.platformFeeAmount ?? 0);
             const { transfer, payoutAmount } = await payoutToDeveloper({
               developerStripeAccountId: developerProfile.stripeAccountId,
               amount: payment.amount,
