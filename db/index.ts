@@ -13,6 +13,17 @@ if (!process.env.DATABASE_URL) {
 // port 6543 — required on Vercel since the direct connection host is
 // IPv6-only and unreachable from Vercel's runtime) doesn't support
 // prepared statements; harmless to disable on a direct connection too.
-const client = postgres(process.env.DATABASE_URL, { max: 1, prepare: false });
+// `ssl: "require"` explicitly, rather than relying on the connection
+// string's own sslmode= query param — a pooler URL missing that param
+// doesn't cleanly reject a plain connection, it just hangs.
+// `statement_timeout` explicitly, too: Supabase's transaction-mode pooler
+// applies a short default (a couple seconds) that a fresh pooled
+// connection's handshake overhead alone can eat into.
+const client = postgres(process.env.DATABASE_URL, {
+  max: 1,
+  prepare: false,
+  ssl: "require",
+  connection: { statement_timeout: 30000 },
+});
 
 export const db = drizzle(client, { schema });
