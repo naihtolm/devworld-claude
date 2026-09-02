@@ -103,6 +103,10 @@ export default async function RootLayout({
                           Client profile
                         </Link>
                       )}
+                      <div className="my-1 border-t border-neutral-100" />
+                      <Link href="/settings" className={menuLinkClass}>
+                        Account settings
+                      </Link>
                       {roles?.isAdmin && (
                         <>
                           <div className="my-1 border-t border-neutral-100" />

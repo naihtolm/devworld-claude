@@ -36,8 +36,10 @@ async function getAppOrigin() {
 
 // Build order item 1 (modules/payments/README.md): a developer needs a
 // Stripe Express account before any milestone on their agreements can be
-// funded. Triggered from the agreement page rather than a profile settings
-// page, since that doesn't exist yet.
+// funded. Design language G-5: this used to only be reachable from deep
+// inside the agreement page, discovered for the first time right when a
+// developer needed it most — /settings (DW-900) is its real home now, and
+// the agreement page still has its own entry point that lands back there.
 export async function connectStripeAccount() {
   const user = await requireCurrentDbUser();
   const stripe = getStripe();
@@ -63,8 +65,8 @@ export async function connectStripeAccount() {
 
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: `${origin}/proposals`,
-    return_url: `${origin}/proposals`,
+    refresh_url: `${origin}/settings`,
+    return_url: `${origin}/settings`,
     type: "account_onboarding",
   });
 
