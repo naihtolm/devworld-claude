@@ -4,10 +4,12 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
-import { agreements, developerProfiles, disputes, adminActions, users, reports } from "@/db/schema";
+import { agreements, developerProfiles, disputes, adminActions, users, reports, milestones, payments } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
+import { getStripe, payoutToDeveloper } from "@/modules/payments/stripe";
+import { dollarsToCents } from "@/modules/payments/fees";
 
 async function requireCurrentDbUser() {
   const { userId: authProviderId } = await auth();
@@ -75,14 +77,23 @@ export async function openDispute(formData: FormData) {
 const resolveDisputeSchema = z.object({
   disputeId: z.string().uuid(),
   resolution: z.string().trim().min(3, "Describe the resolution").max(4000),
+  outcome: z.enum(["no_action", "release_to_developer", "refund_to_client"]).default("no_action"),
 });
 
+// Design language G-7 — this used to only write a text note; the escrowed
+// payment stayed exactly where it was regardless of what the note said.
+// `release_to_developer`/`refund_to_client` reuse the same Stripe transfer
+// (approveMilestone) and refund calls the rest of the payments flow uses,
+// scoped to the milestone the dispute names — a dispute over the whole
+// agreement with no specific milestone still only gets a logged note, since
+// there's no single escrowed payment to act on automatically.
 export async function resolveDispute(formData: FormData) {
   const admin = await requireAdmin();
 
   const parsed = resolveDisputeSchema.safeParse({
     disputeId: formData.get("disputeId"),
     resolution: formData.get("resolution"),
+    outcome: formData.get("outcome") || undefined,
   });
   if (!parsed.success) {
     throw new Error(parsed.error.issues.map((i) => i.message).join(", "));
@@ -91,6 +102,81 @@ export async function resolveDispute(formData: FormData) {
 
   const [dispute] = await db.select().from(disputes).where(eq(disputes.id, values.disputeId));
   if (!dispute) throw new Error("Not found.");
+
+  if (values.outcome !== "no_action") {
+    if (!dispute.milestoneId) {
+      throw new Error(
+        "This dispute isn't tied to a specific milestone — release/refund needs one to know which escrowed payment to act on."
+      );
+    }
+
+    const [milestone] = await db.select().from(milestones).where(eq(milestones.id, dispute.milestoneId));
+    if (!milestone) throw new Error("Milestone not found.");
+    if (milestone.status !== "funded" && milestone.status !== "submitted") {
+      throw new Error(`This milestone is "${milestone.status}" — nothing held in escrow to release or refund.`);
+    }
+
+    const [fundingPayment] = await db
+      .select()
+      .from(payments)
+      .where(and(eq(payments.milestoneId, dispute.milestoneId), eq(payments.type, "milestone_funding")));
+    if (!fundingPayment || fundingPayment.status !== "succeeded") {
+      throw new Error("No succeeded funding payment found for this milestone.");
+    }
+
+    if (values.outcome === "release_to_developer") {
+      const [agreementRow] = await db.select().from(agreements).where(eq(agreements.id, dispute.agreementId));
+      const [devProfile] = await db
+        .select()
+        .from(developerProfiles)
+        .where(eq(developerProfiles.id, agreementRow.developerProfileId));
+      if (!devProfile?.stripeAccountId) {
+        throw new Error("The developer's Stripe account is missing.");
+      }
+
+      const platformFeeCents = dollarsToCents(fundingPayment.platformFeeAmount ?? 0);
+      const { transfer, payoutAmount } = await payoutToDeveloper({
+        developerStripeAccountId: devProfile.stripeAccountId,
+        amount: milestone.amount,
+        platformFeeCents,
+        transferGroup: `dispute_${dispute.id}`,
+      });
+
+      await db
+        .update(milestones)
+        .set({ status: "paid", stripeTransferId: transfer.id, approvedAt: new Date(), paidAt: new Date(), updatedAt: new Date() })
+        .where(eq(milestones.id, dispute.milestoneId));
+
+      await db.insert(payments).values({
+        agreementId: dispute.agreementId,
+        milestoneId: dispute.milestoneId,
+        type: "milestone_payout",
+        amount: payoutAmount,
+        stripeTransferId: transfer.id,
+        status: "succeeded",
+      });
+    } else {
+      // refund_to_client
+      const stripe = getStripe();
+      if (!fundingPayment.stripePaymentIntentId) {
+        throw new Error("No payment intent recorded for this milestone's funding.");
+      }
+      const refund = await stripe.refunds.create({ payment_intent: fundingPayment.stripePaymentIntentId });
+
+      // No "refunded" state exists in milestone_status — the payments
+      // ledger (append-only by design, see db/schema.ts) is the actual
+      // source of truth here, so the milestone's own status is left as-is
+      // rather than forced into a value that doesn't really describe it.
+      await db.insert(payments).values({
+        agreementId: dispute.agreementId,
+        milestoneId: dispute.milestoneId,
+        type: "refund",
+        amount: fundingPayment.amount,
+        stripePaymentIntentId: refund.payment_intent as string,
+        status: "succeeded",
+      });
+    }
+  }
 
   await db
     .update(disputes)
@@ -102,17 +188,23 @@ export async function resolveDispute(formData: FormData) {
     })
     .where(eq(disputes.id, values.disputeId));
 
+  // Resolving used to leave the agreement stuck on "disputed" forever —
+  // put it back to active so the parties can keep working (the dispute
+  // was over one milestone, not necessarily the whole engagement).
+  await db.update(agreements).set({ status: "active" }).where(eq(agreements.id, dispute.agreementId));
+
   // Audit log — every moderation action gets a row (modules/admin/README.md).
   await db.insert(adminActions).values({
     adminUserId: admin.id,
     actionType: "resolve_dispute",
     targetType: "dispute",
     targetId: dispute.id,
-    notes: values.resolution,
+    notes: `[${values.outcome}] ${values.resolution}`,
   });
 
   revalidatePath("/admin");
   revalidatePath(`/admin/disputes/${values.disputeId}`);
+  revalidatePath(`/agreements/${dispute.agreementId}`);
 }
 
 const reportSchema = z.object({

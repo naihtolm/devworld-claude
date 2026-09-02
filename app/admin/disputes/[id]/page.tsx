@@ -13,10 +13,9 @@ import {
   messages,
 } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
-import { resolveDispute } from "@/modules/admin/actions";
+import { ResolveDisputeForm } from "@/modules/admin/ResolveDisputeForm";
 import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
-import { Button } from "@/modules/ui/Button";
 
 export default async function DisputeDetailPage({
   params,
@@ -129,20 +128,10 @@ export default async function DisputeDetailPage({
           <p>{dispute.resolution}</p>
         </div>
       ) : (
-        <form action={resolveDispute} className="space-y-3 rounded-md border border-dashed p-4">
-          <input type="hidden" name="disputeId" value={dispute.id} />
-          <div>
-            <label className="mb-1 block text-sm font-medium">Resolution</label>
-            <textarea
-              name="resolution"
-              required
-              rows={4}
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-              placeholder="What was decided and why"
-            />
-          </div>
-          <Button type="submit">Resolve dispute</Button>
-        </form>
+        <ResolveDisputeForm
+          disputeId={dispute.id}
+          canMoveMoney={milestone?.status === "funded" || milestone?.status === "submitted"}
+        />
       )}
     </main>
   );
