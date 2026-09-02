@@ -10,3 +10,26 @@ body {
 a {
   text-underline-offset: 2px;
 }
+
+/* Applied globally rather than per link — focus-visible was missing on
+   every interactive element in the app (design language §06). This alone
+   covers every <a> tag; Button/LinkButton get their own copy in
+   modules/ui/Button.tsx since they don't render a plain <a> in the button
+   case. */
+a:focus-visible {
+  outline: 2px solid theme("colors.brand.600");
+  outline-offset: 2px;
+}
+
+/* Same reasoning, extended to every other native interactive element the
+   app uses directly (form fields, the <details>/<summary> dropdown
+   pattern used for the header's "More" menu and elsewhere) — components
+   like Button/Tabs/ConfirmDialog carry their own instead of relying on
+   this catch-all. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid theme("colors.brand.600");
+  outline-offset: 2px;
+}

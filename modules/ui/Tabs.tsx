@@ -38,7 +38,7 @@ export function Tabs({
             tabIndex={isActive ? 0 : -1}
             onClick={() => onChange(tab.id)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={`whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            className={`whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${
               isActive
                 ? "border-brand-600 text-brand-700"
                 : "border-transparent text-neutral-500 hover:text-neutral-800"
