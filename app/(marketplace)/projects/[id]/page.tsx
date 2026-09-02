@@ -74,7 +74,12 @@ export default async function ProjectDetailPage({
     <main className="mx-auto max-w-3xl px-6 py-12">
       <div className="mb-4 flex items-center justify-between">
         <StatusBadge status={project.status} />
-        {isOwner && (
+        {isOwner && project.status === "draft" && (
+          <Link href={`/projects/${project.id}/edit`} className="text-sm font-medium text-brand-600 underline">
+            Finish &amp; publish
+          </Link>
+        )}
+        {isOwner && project.status !== "draft" && (
           <Link
             href={`/projects/${project.id}/proposals`}
             className="text-sm font-medium text-brand-600 underline"

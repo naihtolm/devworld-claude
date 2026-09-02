@@ -126,5 +126,90 @@ export async function createProject(formData: FormData) {
     );
   }
 
-  redirect(status === "published" ? `/projects` : `/projects/new?saved=draft`);
+  // Design language G-2: land the client on their own new listing, not the
+  // general marketplace they'd have to go hunt through it in.
+  redirect(status === "published" ? `/projects/${project.id}?published=1` : `/projects/${project.id}/edit?saved=draft`);
+}
+
+// Design language G-1: "Save Draft" used to be a dead end — createProject
+// was the only project-write action, so a draft could never be found or
+// finished again. This is that missing second half.
+export async function updateProject(projectId: string, formData: FormData) {
+  const user = await requireCurrentDbUser();
+
+  const [existing] = await db.select().from(projects).where(eq(projects.id, projectId));
+  if (!existing || existing.clientUserId !== user.id) {
+    throw new Error("Not found.");
+  }
+  if (existing.status !== "draft") {
+    throw new Error("Only a draft can be edited here.");
+  }
+
+  const raw = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    category: formData.get("category"),
+    budgetType: formData.get("budgetType"),
+    budgetMin: formData.get("budgetMin") || undefined,
+    budgetMax: formData.get("budgetMax") || undefined,
+    timelineDays: formData.get("timelineDays") || undefined,
+    visibility: formData.get("visibility"),
+    skillNames: formData.getAll("skillNames").map(String),
+    companyId: formData.get("companyId") || undefined,
+  };
+
+  const parsed = projectFormSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+  const values = parsed.data;
+
+  let companyId: string | undefined;
+  if (values.companyId) {
+    const [membership] = await db
+      .select()
+      .from(companyMemberships)
+      .where(and(eq(companyMemberships.companyId, values.companyId), eq(companyMemberships.userId, user.id)));
+    if (membership) companyId = values.companyId;
+  }
+
+  const intent = formData.get("intent"); // "draft" | "publish"
+  const status = intent === "publish" ? "published" : "draft";
+
+  const skillIds = await resolveSkillIds(values.skillNames);
+
+  await db
+    .update(projects)
+    .set({
+      companyId,
+      title: values.title,
+      description: values.description,
+      category: values.category,
+      budgetType: values.budgetType,
+      budgetMin: values.budgetMin?.toString(),
+      budgetMax: values.budgetMax?.toString(),
+      timelineDays: values.timelineDays,
+      visibility: values.visibility,
+      status,
+    })
+    .where(eq(projects.id, projectId));
+
+  // Re-sync skills rather than diff them — simplest correct approach for a
+  // form that resubmits the full skill list each time.
+  await db.delete(projectSkills).where(eq(projectSkills.projectId, projectId));
+  if (skillIds.length > 0) {
+    await db.insert(projectSkills).values(skillIds.map((skillId) => ({ projectId, skillId })));
+  }
+
+  const files = formData.getAll("attachments").filter(
+    (f): f is File => f instanceof File && f.size > 0
+  );
+  if (files.length > 0) {
+    const uploaded = await Promise.all(files.map((file) => uploadProjectAttachment(file, projectId)));
+    await db.insert(projectAttachments).values(
+      uploaded.map((u) => ({ projectId, fileUrl: u.fileUrl, filename: u.filename }))
+    );
+  }
+
+  redirect(status === "published" ? `/projects/${projectId}?published=1` : `/projects/${projectId}/edit?saved=draft`);
 }

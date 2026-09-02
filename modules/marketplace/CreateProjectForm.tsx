@@ -1,15 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { createProject } from "@/modules/marketplace/actions";
+import { createProject, updateProject } from "@/modules/marketplace/actions";
 import { CATEGORIES } from "@/modules/marketplace/categories";
 import { Button } from "@/modules/ui/Button";
 
-export function CreateProjectForm({ companies = [] }: { companies?: { id: string; name: string }[] }) {
+type ExistingProject = {
+  id: string;
+  title: string;
+  description: string;
+  category: string | null;
+  budgetType: "fixed" | "milestone" | "hourly";
+  budgetMin: string | null;
+  budgetMax: string | null;
+  timelineDays: number | null;
+  visibility: "public" | "invite_only";
+  companyId: string | null;
+  skillNames: string[];
+};
+
+// Reused for both /projects/new (createProject) and /projects/[id]/edit
+// (updateProject, bound to the id) — design language G-1: a draft used to
+// have no way back to this form once saved.
+export function CreateProjectForm({
+  companies = [],
+  existing,
+}: {
+  companies?: { id: string; name: string }[];
+  existing?: ExistingProject;
+}) {
   const [skillInput, setSkillInput] = useState("");
-  const [skillNames, setSkillNames] = useState<string[]>([]);
-  const [budgetType, setBudgetType] = useState<"fixed" | "milestone" | "hourly">("fixed");
+  const [skillNames, setSkillNames] = useState<string[]>(existing?.skillNames ?? []);
+  const [budgetType, setBudgetType] = useState<"fixed" | "milestone" | "hourly">(
+    existing?.budgetType ?? "fixed"
+  );
   const [pending, setPending] = useState(false);
+  const action = existing ? updateProject.bind(null, existing.id) : createProject;
 
   function addSkill() {
     const name = skillInput.trim();
@@ -25,14 +51,18 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
 
   return (
     <form
-      action={createProject}
+      action={action}
       onSubmit={() => setPending(true)}
       className="space-y-6"
     >
       {companies.length > 0 && (
         <div>
           <label className="mb-1 block text-sm font-medium">Post as</label>
-          <select name="companyId" className="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2" defaultValue="">
+          <select
+            name="companyId"
+            className="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2"
+            defaultValue={existing?.companyId ?? ""}
+          >
             <option value="">Myself</option>
             {companies.map((c) => (
               <option key={c.id} value={c.id}>
@@ -50,6 +80,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
           required
           minLength={3}
           maxLength={200}
+          defaultValue={existing?.title}
           className="w-full rounded-md border border-neutral-300 px-3 py-2"
           placeholder="e.g. Build a Stripe Connect payout flow"
         />
@@ -62,6 +93,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
           required
           minLength={20}
           rows={6}
+          defaultValue={existing?.description}
           className="w-full rounded-md border border-neutral-300 px-3 py-2"
           placeholder="What needs to be built, and any context a developer would need to scope it accurately."
         />
@@ -73,7 +105,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
           name="category"
           required
           className="w-full rounded-md border border-neutral-300 px-3 py-2"
-          defaultValue=""
+          defaultValue={existing?.category ?? ""}
         >
           <option value="" disabled>
             Choose a category
@@ -160,6 +192,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
             type="number"
             min={0}
             step="0.01"
+            defaultValue={existing?.budgetMin ?? undefined}
             className="w-full rounded-md border border-neutral-300 px-3 py-2"
           />
         </div>
@@ -172,6 +205,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
             type="number"
             min={0}
             step="0.01"
+            defaultValue={existing?.budgetMax ?? undefined}
             className="w-full rounded-md border border-neutral-300 px-3 py-2"
           />
         </div>
@@ -183,6 +217,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
           name="timelineDays"
           type="number"
           min={1}
+          defaultValue={existing?.timelineDays ?? undefined}
           className="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2"
         />
       </div>
@@ -191,7 +226,7 @@ export function CreateProjectForm({ companies = [] }: { companies?: { id: string
         <label className="mb-1 block text-sm font-medium">Visibility</label>
         <select
           name="visibility"
-          defaultValue="public"
+          defaultValue={existing?.visibility ?? "public"}
           className="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2"
         >
           <option value="public">Public — anyone can browse and propose</option>

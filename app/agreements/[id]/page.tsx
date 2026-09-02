@@ -64,6 +64,13 @@ export default async function AgreementDetailPage({
 
   const canEditMilestones =
     isClient && (agreement.status === "draft" || agreement.status === "pending_acceptance");
+  // Design language G-3: completion used to be a bare manual button,
+  // disconnected from whether the work was actually done — someone could
+  // mark it finished with milestones still unpaid, or a fully-paid
+  // agreement could sit active indefinitely with nobody noticing. Surface
+  // it as a real prompt once there's nothing left to pay out.
+  const allMilestonesPaid =
+    agreementMilestones.length > 0 && agreementMilestones.every((m) => m.status === "paid");
   const myAcceptedAt = isClient ? agreement.clientAcceptedAt : agreement.developerAcceptedAt;
   const developerStripeReady = developer?.stripeOnboardingComplete ?? false;
 
@@ -406,7 +413,20 @@ export default async function AgreementDetailPage({
         </form>
       )}
 
-      {agreement.status === "active" && (
+      {agreement.status === "active" && allMilestonesPaid && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-card border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-sm text-emerald-800">
+            Every milestone is paid — nothing left outstanding on this agreement.
+          </p>
+          <form action={markAgreementCompleted.bind(null, agreement.id)}>
+            <Button type="submit" size="sm">
+              Mark completed
+            </Button>
+          </form>
+        </div>
+      )}
+
+      {agreement.status === "active" && !allMilestonesPaid && (
         <div className="mb-4 flex items-center gap-3">
           <p className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             Active — both parties have accepted.
