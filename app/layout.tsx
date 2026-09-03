@@ -103,6 +103,11 @@ export default async function RootLayout({
                           Client profile
                         </Link>
                       )}
+                      {(roles?.isClient || roles?.isDeveloper) && (
+                        <Link href="/earnings" className={menuLinkClass}>
+                          {roles?.isDeveloper && !roles?.isClient ? "Earnings" : roles?.isClient && !roles?.isDeveloper ? "Spending" : "Earnings & spending"}
+                        </Link>
+                      )}
                       <div className="my-1 border-t border-neutral-100" />
                       <Link href="/settings" className={menuLinkClass}>
                         Account settings
