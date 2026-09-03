@@ -6,10 +6,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
-import { agreements, developerProfiles, disputes, adminActions, users, reports, milestones, payments } from "@/db/schema";
+import { agreements, developerProfiles, disputes, adminActions, users, reports, milestones, payments, projects } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { getStripe, payoutToDeveloper } from "@/modules/payments/stripe";
 import { dollarsToCents } from "@/modules/payments/fees";
+import { createNotification } from "@/modules/notifications/create";
 
 async function requireCurrentDbUser() {
   const { userId: authProviderId } = await auth();
@@ -192,6 +193,30 @@ export async function resolveDispute(formData: FormData) {
   // put it back to active so the parties can keep working (the dispute
   // was over one milestone, not necessarily the whole engagement).
   await db.update(agreements).set({ status: "active" }).where(eq(agreements.id, dispute.agreementId));
+
+  const [resolvedAgreement] = await db.select().from(agreements).where(eq(agreements.id, dispute.agreementId));
+  if (resolvedAgreement) {
+    const [resolvedProject] = await db.select().from(projects).where(eq(projects.id, resolvedAgreement.projectId));
+    const [resolvedDeveloper] = await db
+      .select()
+      .from(developerProfiles)
+      .where(eq(developerProfiles.id, resolvedAgreement.developerProfileId));
+    const title = `Your dispute over "${resolvedProject?.title ?? "an agreement"}" was resolved`;
+    await createNotification({
+      userId: resolvedAgreement.clientUserId,
+      type: "dispute_resolved",
+      title,
+      href: `/agreements/${resolvedAgreement.id}`,
+    });
+    if (resolvedDeveloper) {
+      await createNotification({
+        userId: resolvedDeveloper.userId,
+        type: "dispute_resolved",
+        title,
+        href: `/agreements/${resolvedAgreement.id}`,
+      });
+    }
+  }
 
   // Audit log — every moderation action gets a row (modules/admin/README.md).
   await db.insert(adminActions).values({

@@ -7,10 +7,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { agreements, developerProfiles, milestones, payments } from "@/db/schema";
+import { agreements, developerProfiles, milestones, payments, projects } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { getStripe, PLATFORM_FEE_BPS, payoutToDeveloper } from "@/modules/payments/stripe";
 import { dollarsToCents, calculateFeeCents, centsToDollarString } from "@/modules/payments/fees";
+import { createNotification } from "@/modules/notifications/create";
 
 async function requireCurrentDbUser() {
   const { userId: authProviderId } = await auth();
@@ -201,6 +202,17 @@ export async function submitMilestoneWork(milestoneId: string) {
     .set({ status: "submitted", submittedAt: new Date(), updatedAt: new Date() })
     .where(eq(milestones.id, milestoneId));
 
+  const [project] = await db.select().from(projects).where(eq(projects.id, agreement.projectId));
+  if (project) {
+    await createNotification({
+      userId: agreement.clientUserId,
+      type: "milestone_submitted",
+      title: `"${milestone.title}" submitted for review`,
+      body: project.title,
+      href: `/agreements/${agreement.id}`,
+    });
+  }
+
   revalidatePath(`/agreements/${agreement.id}`);
 }
 
@@ -257,6 +269,15 @@ export async function approveMilestone(milestoneId: string) {
     amount: payoutAmount,
     stripeTransferId: transfer.id,
     status: "succeeded",
+  });
+
+  const [project] = await db.select().from(projects).where(eq(projects.id, agreement.projectId));
+  await createNotification({
+    userId: developerProfile.userId,
+    type: "milestone_paid",
+    title: `"${milestone.title}" approved — $${payoutAmount} paid out`,
+    body: project?.title,
+    href: `/agreements/${agreement.id}`,
   });
 
   revalidatePath(`/agreements/${agreement.id}`);

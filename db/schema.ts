@@ -511,6 +511,27 @@ export const adminActions = pgTable("admin_actions", {
 });
 
 // ---------------------------------------------------------------------------
+// NOTIFICATIONS — DW-800. `type` is a plain varchar rather than a pgEnum
+// (unlike most status fields in this file) since notification types will
+// grow organically as more actions fire one, and an enum would need a
+// migration for every addition — the same reasoning `reports.targetType`
+// and `adminActions.actionType` already use as plain strings.
+// ---------------------------------------------------------------------------
+
+export const notifications = pgTable("notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 50 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  body: text("body"),
+  href: text("href"),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("notifications_user_idx").on(t.userId),
+}));
+
+// ---------------------------------------------------------------------------
 // FAVORITES — DW-503. Same polymorphic targetType/targetId pattern as
 // `reports`, rather than two separate tables for saved developers vs
 // saved projects.

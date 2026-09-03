@@ -14,6 +14,7 @@ import {
   invitations,
 } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
+import { createNotification } from "@/modules/notifications/create";
 
 async function requireCurrentDbUser() {
   const { userId: authProviderId } = await auth();
@@ -147,6 +148,20 @@ export async function acceptProposal(proposalId: string) {
     .set({ status: "agreement_pending" })
     .where(eq(projects.id, project.id));
 
+  const [developerProfile] = await db
+    .select()
+    .from(developerProfiles)
+    .where(eq(developerProfiles.id, proposal.developerProfileId));
+  if (developerProfile) {
+    await createNotification({
+      userId: developerProfile.userId,
+      type: "proposal_accepted",
+      title: `You were selected for "${project.title}"`,
+      body: "Confirm the agreement to get started.",
+      href: `/agreements/${agreement.id}`,
+    });
+  }
+
   redirect(`/agreements/${agreement.id}`);
 }
 
@@ -189,6 +204,19 @@ export async function sendInvitation(formData: FormData) {
     message: values.message,
     status: "sent",
   });
+
+  const [developerProfile] = await db
+    .select()
+    .from(developerProfiles)
+    .where(eq(developerProfiles.id, values.developerProfileId));
+  if (developerProfile) {
+    await createNotification({
+      userId: developerProfile.userId,
+      type: "invitation_received",
+      title: `You were invited to "${project.title}"`,
+      href: "/invitations",
+    });
+  }
 
   revalidatePath(`/developers/${values.developerProfileId}`);
 }

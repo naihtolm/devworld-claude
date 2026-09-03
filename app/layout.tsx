@@ -10,6 +10,7 @@ import {
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { getUserRoles } from "@/modules/profiles/roles";
 import { ToastProvider } from "@/modules/ui/Toast";
+import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -33,9 +34,13 @@ export default async function RootLayout({
   // to every anonymous page view.
   const { userId: authProviderId } = await auth();
   let roles: Awaited<ReturnType<typeof getUserRoles>> | null = null;
+  let dbUserId: string | null = null;
   if (authProviderId) {
     const user = await ensureCurrentUser();
-    if (user) roles = await getUserRoles(user.id);
+    if (user) {
+      dbUserId = user.id;
+      roles = await getUserRoles(user.id);
+    }
   }
 
   return (
@@ -59,6 +64,7 @@ export default async function RootLayout({
                   <Link href="/messages" className={navLinkClass}>
                     Messages
                   </Link>
+                  {dbUserId && <NotificationBell userId={dbUserId} />}
                   {roles?.isClient && (
                     <Link href="/projects/new" className={navLinkClass}>
                       Post a project

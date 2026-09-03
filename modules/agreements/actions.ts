@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { agreements, developerProfiles, milestones, projects, changeRequests } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
+import { createNotification } from "@/modules/notifications/create";
 
 async function requireCurrentDbUser() {
   const { userId: authProviderId } = await auth();
@@ -54,6 +55,7 @@ export async function acceptAgreement(agreementId: string) {
 
   const clientAccepted = isClient ? true : agreement.clientAcceptedAt !== null;
   const developerAccepted = isDeveloper ? true : agreement.developerAcceptedAt !== null;
+  const justActivated = clientAccepted && developerAccepted && agreement.status !== "active";
 
   await db
     .update(agreements)
@@ -63,6 +65,37 @@ export async function acceptAgreement(agreementId: string) {
       updatedAt: new Date(),
     })
     .where(eq(agreements.id, agreementId));
+
+  const [project] = await db.select().from(projects).where(eq(projects.id, agreement.projectId));
+  const [developerProfile] = await db
+    .select()
+    .from(developerProfiles)
+    .where(eq(developerProfiles.id, agreement.developerProfileId));
+
+  if (project && developerProfile) {
+    if (justActivated) {
+      await createNotification({
+        userId: agreement.clientUserId,
+        type: "agreement_active",
+        title: `Your agreement for "${project.title}" is now active`,
+        href: `/agreements/${agreementId}`,
+      });
+      await createNotification({
+        userId: developerProfile.userId,
+        type: "agreement_active",
+        title: `Your agreement for "${project.title}" is now active`,
+        href: `/agreements/${agreementId}`,
+      });
+    } else {
+      const otherPartyUserId = isClient ? developerProfile.userId : agreement.clientUserId;
+      await createNotification({
+        userId: otherPartyUserId,
+        type: "agreement_confirmed",
+        title: `The agreement for "${project.title}" is waiting on your confirmation`,
+        href: `/agreements/${agreementId}`,
+      });
+    }
+  }
 
   revalidatePath(`/agreements/${agreementId}`);
 }
