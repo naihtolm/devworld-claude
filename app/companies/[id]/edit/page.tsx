@@ -32,7 +32,7 @@ export default async function EditCompanyPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Edit {company.name}</h1>
+      <h1 className="mb-6 text-h1">Edit {company.name}</h1>
       <form action={updateCompany} className="space-y-6">
         <input type="hidden" name="companyId" value={company.id} />
         <div>

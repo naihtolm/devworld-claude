@@ -8,6 +8,7 @@ import { ensureCurrentUser } from "@/modules/auth/user";
 import { acceptInvitation, declineInvitation } from "@/modules/proposals/actions";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
 import { Button } from "@/modules/ui/Button";
+import { Card } from "@/modules/ui/Card";
 
 // Developer's invitations inbox — modules/proposals/README.md's screen spec:
 // project title, budget, client, message, accept (-> proposal) or decline.
@@ -46,41 +47,43 @@ export default async function InvitationsPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Invitations</h1>
+      <h1 className="mb-6 text-h1">Invitations</h1>
 
       {rowsWithClient.length === 0 ? (
         <p className="text-neutral-500">No invitations yet.</p>
       ) : (
         <ul className="space-y-3">
           {rowsWithClient.map(({ invitation, project, clientName }) => (
-            <li key={invitation.id} className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-              <div className="mb-1 flex items-center justify-between">
-                <Link href={`/projects/${project.id}`} className="font-medium hover:text-brand-600">
-                  {project.title}
-                </Link>
-                <StatusBadge status={invitation.status} />
-              </div>
-              <p className="mb-2 text-sm text-neutral-500">
-                From {clientName} ·{" "}
-                {project.budgetMin && project.budgetMax
-                  ? `$${project.budgetMin}–$${project.budgetMax}`
-                  : "Budget not specified"}
-              </p>
-              {invitation.message && <p className="mb-3 text-sm text-neutral-600">{invitation.message}</p>}
-              {invitation.status === "sent" && (
-                <div className="flex gap-3">
-                  <form action={acceptInvitation.bind(null, invitation.id)}>
-                    <Button type="submit" size="sm">
-                      Accept
-                    </Button>
-                  </form>
-                  <form action={declineInvitation.bind(null, invitation.id)}>
-                    <Button type="submit" variant="secondary" size="sm">
-                      Decline
-                    </Button>
-                  </form>
+            <li key={invitation.id}>
+              <Card>
+                <div className="mb-1 flex items-center justify-between">
+                  <Link href={`/projects/${project.id}`} className="font-medium hover:text-brand-600">
+                    {project.title}
+                  </Link>
+                  <StatusBadge status={invitation.status} />
                 </div>
-              )}
+                <p className="mb-2 text-sm text-neutral-500">
+                  From {clientName} ·{" "}
+                  {project.budgetMin && project.budgetMax
+                    ? `$${project.budgetMin}–$${project.budgetMax}`
+                    : "Budget not specified"}
+                </p>
+                {invitation.message && <p className="mb-3 text-sm text-neutral-600">{invitation.message}</p>}
+                {invitation.status === "sent" && (
+                  <div className="flex gap-3">
+                    <form action={acceptInvitation.bind(null, invitation.id)}>
+                      <Button type="submit" size="sm">
+                        Accept
+                      </Button>
+                    </form>
+                    <form action={declineInvitation.bind(null, invitation.id)}>
+                      <Button type="submit" variant="secondary" size="sm">
+                        Decline
+                      </Button>
+                    </form>
+                  </div>
+                )}
+              </Card>
             </li>
           ))}
         </ul>

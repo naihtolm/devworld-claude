@@ -42,7 +42,7 @@ export default async function MyProposalsPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">My Proposals</h1>
+      <h1 className="mb-6 text-h1">My Proposals</h1>
 
       {rows.length === 0 ? (
         <p className="text-neutral-500">

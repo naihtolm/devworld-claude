@@ -4,6 +4,7 @@ import { projects, projectSkills, skills } from "@/db/schema";
 import { and, desc, eq, exists, gte, lte, or, isNull, sql } from "drizzle-orm";
 import { CATEGORIES } from "@/modules/marketplace/categories";
 import { Button } from "@/modules/ui/Button";
+import { Card } from "@/modules/ui/Card";
 
 // Postgres full-text search + filters (category, skill, budget range) — see
 // modules/marketplace/README.md's V1 build order. Filter state lives in the
@@ -67,9 +68,9 @@ export default async function ProjectsPage({
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Browse Projects</h1>
+      <h1 className="mb-6 text-h1">Browse Projects</h1>
 
-      <form className="mb-8 space-y-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm" action="/projects">
+      <form className="mb-8 space-y-3 rounded-card border border-neutral-200 bg-white p-4 shadow-card" action="/projects">
         <input
           name="q"
           defaultValue={q ?? ""}
@@ -131,20 +132,19 @@ export default async function ProjectsPage({
       ) : (
         <ul className="space-y-4">
           {publishedProjects.map((project) => (
-            <li
-              key={project.id}
-              className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <Link href={`/projects/${project.id}`} className="font-medium text-neutral-900 hover:text-brand-600">
-                {project.title}
-              </Link>
-              <p className="mt-1 text-sm text-neutral-600">{project.description}</p>
-              <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
-                <span className="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-700">
-                  {project.category}
-                </span>
-                <span className="capitalize">{project.budgetType}</span>
-              </p>
+            <li key={project.id}>
+              <Card className="hover:shadow-popover">
+                <Link href={`/projects/${project.id}`} className="font-medium text-neutral-900 hover:text-brand-600">
+                  {project.title}
+                </Link>
+                <p className="mt-1 text-sm text-neutral-600">{project.description}</p>
+                <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
+                  <span className="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-700">
+                    {project.category}
+                  </span>
+                  <span className="capitalize">{project.budgetType}</span>
+                </p>
+              </Card>
             </li>
           ))}
         </ul>

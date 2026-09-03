@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { disputes, agreements, projects, users } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
+import { Card } from "@/modules/ui/Card";
 
 export default async function AdminDashboard() {
   const { userId: authProviderId } = await auth();
@@ -27,7 +28,7 @@ export default async function AdminDashboard() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Admin — Disputes</h1>
+        <h1 className="text-h1">Admin — Disputes</h1>
         <Link href="/admin/reports" className="text-sm text-brand-600 underline">
           Reports →
         </Link>
@@ -38,19 +39,18 @@ export default async function AdminDashboard() {
       ) : (
         <ul className="space-y-3">
           {rows.map(({ dispute, project }) => (
-            <li
-              key={dispute.id}
-              className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="mb-1 flex items-center justify-between">
-                <Link href={`/admin/disputes/${dispute.id}`} className="font-medium hover:text-brand-600">
-                  {dispute.reason}
-                </Link>
-                <StatusBadge status={dispute.status} />
-              </div>
-              <p className="text-sm text-neutral-500">
-                {project?.title ?? "Unknown project"} · opened {new Date(dispute.createdAt).toLocaleDateString()}
-              </p>
+            <li key={dispute.id}>
+              <Card className="hover:shadow-popover">
+                <div className="mb-1 flex items-center justify-between">
+                  <Link href={`/admin/disputes/${dispute.id}`} className="font-medium hover:text-brand-600">
+                    {dispute.reason}
+                  </Link>
+                  <StatusBadge status={dispute.status} />
+                </div>
+                <p className="text-sm text-neutral-500">
+                  {project?.title ?? "Unknown project"} · opened {new Date(dispute.createdAt).toLocaleDateString()}
+                </p>
+              </Card>
             </li>
           ))}
         </ul>

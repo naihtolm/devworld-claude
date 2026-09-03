@@ -108,7 +108,7 @@ export default async function AgreementDetailPage({
       )}
 
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{project?.title ?? "Agreement"}</h1>
+        <h1 className="text-h1">{project?.title ?? "Agreement"}</h1>
         <StatusBadge status={agreement.status} />
       </div>
 
@@ -177,7 +177,7 @@ export default async function AgreementDetailPage({
             {agreementMilestones.map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-md border border-neutral-200 bg-white p-3 text-sm shadow-sm"
+                className="flex items-center justify-between rounded-card border border-neutral-200 bg-white p-3 text-sm shadow-card"
               >
                 <div>
                   <p className="font-medium">{m.title}</p>
@@ -270,7 +270,7 @@ export default async function AgreementDetailPage({
               {hourlyInvoices.map((inv) => (
                 <li
                   key={inv.id}
-                  className="flex items-center justify-between rounded-md border border-neutral-200 bg-white p-3 text-sm shadow-sm"
+                  className="flex items-center justify-between rounded-card border border-neutral-200 bg-white p-3 text-sm shadow-card"
                 >
                   <div>
                     <p className="font-medium">${inv.amount}</p>
@@ -331,7 +331,7 @@ export default async function AgreementDetailPage({
               {agreementChangeRequests.map((cr) => (
                 <li
                   key={cr.id}
-                  className="rounded-md border border-neutral-200 bg-white p-3 text-sm shadow-sm"
+                  className="rounded-card border border-neutral-200 bg-white p-3 text-sm shadow-card"
                 >
                   <div className="mb-1 flex items-center justify-between">
                     <p className="font-medium">{cr.description}</p>
@@ -443,7 +443,7 @@ export default async function AgreementDetailPage({
         <div className="mb-8">
           <h2 className="mb-3 text-sm font-medium text-neutral-500">Reviews</h2>
           {theirReview && (
-            <div className="mb-3 rounded-md border border-neutral-200 bg-white p-3 text-sm shadow-sm">
+            <div className="mb-3 rounded-card border border-neutral-200 bg-white p-3 text-sm shadow-card">
               <p className="mb-1 font-medium text-amber-500">
                 {"★".repeat(theirReview.rating)}
                 <span className="text-neutral-300">{"★".repeat(5 - theirReview.rating)}</span>

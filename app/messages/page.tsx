@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { eq, desc, and, ne } from "drizzle-orm";
@@ -7,6 +6,7 @@ import { conversations, conversationParticipants, users, projects, messages } fr
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { Avatar } from "@/modules/profiles/Avatar";
+import { LinkCard } from "@/modules/ui/Card";
 
 export default async function MessagesPage() {
   const { userId: authProviderId } = await auth();
@@ -55,7 +55,7 @@ export default async function MessagesPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Messages</h1>
+      <h1 className="mb-6 text-h1">Messages</h1>
 
       {rows.length === 0 ? (
         <p className="text-neutral-500">No conversations yet.</p>
@@ -63,10 +63,7 @@ export default async function MessagesPage() {
         <ul className="space-y-2">
           {rows.map(({ conversation, name, imageUrl, project, lastMessage }) => (
             <li key={conversation.id}>
-              <Link
-                href={`/messages/${conversation.id}`}
-                className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-              >
+              <LinkCard href={`/messages/${conversation.id}`} className="flex items-center gap-3">
                 <Avatar name={name} imageUrl={imageUrl} />
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center justify-between">
@@ -77,7 +74,7 @@ export default async function MessagesPage() {
                     {lastMessage?.body ?? "No messages yet"}
                   </p>
                 </div>
-              </Link>
+              </LinkCard>
             </li>
           ))}
         </ul>

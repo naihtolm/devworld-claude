@@ -64,7 +64,7 @@ export default async function ProposalDetailPage({
       <div className="mb-1 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar name={name} imageUrl={imageUrl} size="lg" />
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-h1">
             <Link href={`/developers/${developer.id}`} className="hover:underline">
               {name}
             </Link>

@@ -11,6 +11,7 @@ import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { Avatar } from "@/modules/profiles/Avatar";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
 import { Button } from "@/modules/ui/Button";
+import { Card } from "@/modules/ui/Card";
 
 export default async function ProjectProposalsPage({
   params,
@@ -51,54 +52,53 @@ export default async function ProjectProposalsPage({
       <Link href={`/projects/${id}`} className="mb-6 inline-block text-sm text-neutral-500 underline">
         ← Back to project
       </Link>
-      <h1 className="mb-6 text-2xl font-semibold">Proposals for &ldquo;{project.title}&rdquo;</h1>
+      <h1 className="mb-6 text-h1">Proposals for &ldquo;{project.title}&rdquo;</h1>
 
       {proposalsWithNames.length === 0 ? (
         <p className="text-neutral-500">No proposals yet.</p>
       ) : (
         <ul className="space-y-4">
           {proposalsWithNames.map(({ proposal, developer, name, imageUrl, badge }) => (
-            <li
-              key={proposal.id}
-              className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="mb-1 flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Avatar name={name} imageUrl={imageUrl} size="sm" />
-                  <Link href={`/developers/${developer.id}`} className="font-medium hover:text-brand-600">
-                    {name}
+            <li key={proposal.id}>
+              <Card className="hover:shadow-popover">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Avatar name={name} imageUrl={imageUrl} size="sm" />
+                    <Link href={`/developers/${developer.id}`} className="font-medium hover:text-brand-600">
+                      {name}
+                    </Link>
+                    <span className="text-xs text-neutral-400">{badge}</span>
+                  </span>
+                  <StatusBadge status={proposal.status} />
+                </div>
+                <p className="mb-2 text-sm text-neutral-600">
+                  ${proposal.proposedAmount}
+                  {proposal.proposedRateType === "hourly" ? "/hr" : ""} ·{" "}
+                  {proposal.estimatedTimelineDays
+                    ? `${proposal.estimatedTimelineDays} days`
+                    : "No timeline given"}
+                </p>
+                <p className="mb-3 line-clamp-2 text-sm text-neutral-500">{proposal.introduction}</p>
+                <div className="flex items-center gap-3 text-sm">
+                  <Link href={`/projects/${id}/proposals/${proposal.id}`} className="text-brand-600 underline">
+                    View full
                   </Link>
-                  <span className="text-xs text-neutral-400">{badge}</span>
-                </span>
-                <StatusBadge status={proposal.status} />
-              </div>
-              <p className="mb-2 text-sm text-neutral-600">
-                ${proposal.proposedAmount}
-                {proposal.proposedRateType === "hourly" ? "/hr" : ""} ·{" "}
-                {proposal.estimatedTimelineDays
-                  ? `${proposal.estimatedTimelineDays} days`
-                  : "No timeline given"}
-              </p>
-              <p className="mb-3 line-clamp-2 text-sm text-neutral-500">{proposal.introduction}</p>
-              <div className="flex items-center gap-3 text-sm">
-                <Link href={`/projects/${id}/proposals/${proposal.id}`} className="text-brand-600 underline">
-                  View full
-                </Link>
-                {proposal.status === "submitted" && (
-                  <>
-                    <form action={shortlistProposal.bind(null, proposal.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="p-0 text-neutral-700">
-                        Shortlist
-                      </Button>
-                    </form>
-                    <form action={declineProposal.bind(null, proposal.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="p-0 text-neutral-400">
-                        Decline
-                      </Button>
-                    </form>
-                  </>
-                )}
-              </div>
+                  {proposal.status === "submitted" && (
+                    <>
+                      <form action={shortlistProposal.bind(null, proposal.id)}>
+                        <Button type="submit" variant="ghost" size="sm" className="p-0 text-neutral-700">
+                          Shortlist
+                        </Button>
+                      </form>
+                      <form action={declineProposal.bind(null, proposal.id)}>
+                        <Button type="submit" variant="ghost" size="sm" className="p-0 text-neutral-400">
+                          Decline
+                        </Button>
+                      </form>
+                    </>
+                  )}
+                </div>
+              </Card>
             </li>
           ))}
         </ul>

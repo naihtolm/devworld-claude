@@ -14,6 +14,7 @@ import { sendInvitation } from "@/modules/proposals/actions";
 import { isFavorited } from "@/modules/favorites/actions";
 import { FavoriteButton } from "@/modules/favorites/FavoriteButton";
 import { Button } from "@/modules/ui/Button";
+import { Card } from "@/modules/ui/Card";
 import { ReportForm } from "@/modules/admin/ReportForm";
 
 export default async function DeveloperProfilePage({
@@ -62,7 +63,7 @@ export default async function DeveloperProfilePage({
         <div className="flex items-center gap-4">
           <Avatar name={name} imageUrl={imageUrl} size="lg" />
           <div>
-            <h1 className="text-2xl font-semibold">{name}</h1>
+            <h1 className="text-h1">{name}</h1>
             {profile.headline && <p className="text-neutral-600">{profile.headline}</p>}
           </div>
         </div>
@@ -208,34 +209,36 @@ export default async function DeveloperProfilePage({
         ) : (
           <ul className="mb-4 space-y-3">
             {items.map((item) => (
-              <li key={item.id} className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-                <div className="mb-1 flex items-center justify-between">
-                  <p className="font-medium">{item.title}</p>
-                  {isOwner && (
-                    <form action={deletePortfolioItem.bind(null, item.id)}>
-                      <button type="submit" className="text-xs text-neutral-400 underline">
-                        Remove
-                      </button>
-                    </form>
+              <li key={item.id}>
+                <Card>
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="font-medium">{item.title}</p>
+                    {isOwner && (
+                      <form action={deletePortfolioItem.bind(null, item.id)}>
+                        <button type="submit" className="text-xs text-neutral-400 underline">
+                          Remove
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                  {item.role && <p className="text-sm text-neutral-500">{item.role}</p>}
+                  {item.description && <p className="mt-1 text-sm text-neutral-600">{item.description}</p>}
+                  {item.technologies && item.technologies.length > 0 && (
+                    <p className="mt-2 text-xs text-neutral-400">{item.technologies.join(" · ")}</p>
                   )}
-                </div>
-                {item.role && <p className="text-sm text-neutral-500">{item.role}</p>}
-                {item.description && <p className="mt-1 text-sm text-neutral-600">{item.description}</p>}
-                {item.technologies && item.technologies.length > 0 && (
-                  <p className="mt-2 text-xs text-neutral-400">{item.technologies.join(" · ")}</p>
-                )}
-                <div className="mt-2 flex gap-3 text-sm">
-                  {item.repoUrl && (
-                    <a href={item.repoUrl} target="_blank" rel="noreferrer" className="text-brand-600 underline">
-                      Repo
-                    </a>
-                  )}
-                  {item.externalUrl && (
-                    <a href={item.externalUrl} target="_blank" rel="noreferrer" className="text-brand-600 underline">
-                      Live
-                    </a>
-                  )}
-                </div>
+                  <div className="mt-2 flex gap-3 text-sm">
+                    {item.repoUrl && (
+                      <a href={item.repoUrl} target="_blank" rel="noreferrer" className="text-brand-600 underline">
+                        Repo
+                      </a>
+                    )}
+                    {item.externalUrl && (
+                      <a href={item.externalUrl} target="_blank" rel="noreferrer" className="text-brand-600 underline">
+                        Live
+                      </a>
+                    )}
+                  </div>
+                </Card>
               </li>
             ))}
           </ul>

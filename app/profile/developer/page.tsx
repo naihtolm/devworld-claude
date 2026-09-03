@@ -31,7 +31,7 @@ export default async function EditDeveloperProfilePage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Developer profile</h1>
+      <h1 className="mb-6 text-h1">Developer profile</h1>
       <DeveloperProfileForm profile={profile} skillNames={currentSkills.map((s) => s.name)} />
 
       <div className="mt-10 border-t border-neutral-200 pt-6">

@@ -67,13 +67,13 @@ export default async function DisputeDetailPage({
       </Link>
 
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{dispute.reason}</h1>
+        <h1 className="text-h1">{dispute.reason}</h1>
         <StatusBadge status={dispute.status} />
       </div>
 
       {dispute.description && <p className="mb-6 whitespace-pre-wrap text-neutral-700">{dispute.description}</p>}
 
-      <div className="mb-6 rounded-md border border-neutral-200 bg-white p-4 text-sm shadow-sm">
+      <div className="mb-6 rounded-card border border-neutral-200 bg-white p-4 text-sm shadow-card">
         <p className="mb-1">
           <span className="text-neutral-500">Opened by:</span> {openedByUser?.email}
         </p>
@@ -109,7 +109,7 @@ export default async function DisputeDetailPage({
         {threadWithNames.length === 0 ? (
           <p className="text-sm text-neutral-400">No messages found.</p>
         ) : (
-          <ul className="space-y-2 rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+          <ul className="space-y-2 rounded-card border border-neutral-200 bg-white p-3 shadow-card">
             {threadWithNames.map((m) => (
               <li key={m.id} className="text-sm">
                 <span className="font-medium">{m.senderName}:</span> {m.body}

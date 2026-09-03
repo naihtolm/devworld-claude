@@ -37,7 +37,7 @@ export default async function CompanyProfilePage({
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       <div className="mb-4 flex items-start justify-between">
-        <h1 className="text-2xl font-semibold">{company.name}</h1>
+        <h1 className="text-h1">{company.name}</h1>
         {canEdit && (
           <div className="flex gap-4">
             <Link href={`/companies/${company.id}/members`} className="text-sm text-brand-600 underline">

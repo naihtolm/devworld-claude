@@ -9,7 +9,7 @@ export default async function NewCompanyPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Create a company</h1>
+      <h1 className="mb-6 text-h1">Create a company</h1>
       <form action={createCompany} className="space-y-6">
         <div>
           <label className="mb-1 block text-sm font-medium">Company name</label>

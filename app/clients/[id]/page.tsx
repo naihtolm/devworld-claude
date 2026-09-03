@@ -42,7 +42,7 @@ export default async function ClientProfilePage({
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center gap-4">
           <Avatar name={name} imageUrl={imageUrl} size="lg" />
-          <h1 className="text-2xl font-semibold">{name}</h1>
+          <h1 className="text-h1">{name}</h1>
         </div>
         {isOwner && (
           <Link href="/profile/client" className="text-sm text-brand-600 underline">

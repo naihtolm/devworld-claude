@@ -3,6 +3,7 @@ import { count, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { projects, developerProfiles, agreements } from "@/db/schema";
 import { CATEGORIES } from "@/modules/marketplace/categories";
+import { LinkCard } from "@/modules/ui/Card";
 
 // Live counts, not something to freeze at build time — also sidesteps
 // Next.js attempting to statically prerender this against the database
@@ -97,15 +98,11 @@ export default async function HomePage() {
         <h2 className="mb-4 text-lg font-semibold">Browse by category</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {CATEGORIES.map((category) => (
-            <Link
-              key={category}
-              href={`/projects?category=${encodeURIComponent(category)}`}
-              className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-            >
+            <LinkCard key={category} href={`/projects?category=${encodeURIComponent(category)}`}>
               <span className="mb-2 block text-2xl">{CATEGORY_ICONS[category] ?? "🧩"}</span>
               <span className="block text-sm font-medium">{category}</span>
               <span className="text-xs text-neutral-400">{countByCategory.get(category) ?? 0} projects</span>
-            </Link>
+            </LinkCard>
           ))}
         </div>
       </div>
@@ -120,11 +117,7 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {recentProjects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/projects/${project.id}`}
-                className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-              >
+              <LinkCard key={project.id} href={`/projects/${project.id}`}>
                 <p className="font-medium text-neutral-900">{project.title}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{project.description}</p>
                 <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
@@ -133,7 +126,7 @@ export default async function HomePage() {
                   </span>
                   <span className="capitalize">{project.budgetType}</span>
                 </p>
-              </Link>
+              </LinkCard>
             ))}
           </div>
         </div>
