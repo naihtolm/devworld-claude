@@ -39,9 +39,14 @@ export default async function CompanyProfilePage({
       <div className="mb-4 flex items-start justify-between">
         <h1 className="text-2xl font-semibold">{company.name}</h1>
         {canEdit && (
-          <Link href={`/companies/${company.id}/edit`} className="text-sm text-brand-600 underline">
-            Edit company
-          </Link>
+          <div className="flex gap-4">
+            <Link href={`/companies/${company.id}/members`} className="text-sm text-brand-600 underline">
+              Team
+            </Link>
+            <Link href={`/companies/${company.id}/edit`} className="text-sm text-brand-600 underline">
+              Edit company
+            </Link>
+          </div>
         )}
       </div>
 

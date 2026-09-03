@@ -14,6 +14,7 @@ import {
   portfolioItems,
   companies,
   companyMemberships,
+  users,
 } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 
@@ -331,4 +332,85 @@ export async function updateCompany(formData: FormData) {
 
   revalidatePath(`/companies/${companyId}`);
   redirect(`/companies/${companyId}`);
+}
+
+// DW-308 — companyMemberships already supported more than one member per
+// company (role enum: owner/admin/hiring_manager/member), but there was no
+// screen to actually invite or manage anyone beyond the creator. No
+// separate invitations table exists for this, so adding someone is direct
+// (they need a Devworld account already) rather than a pending/accept flow.
+const addMemberSchema = z.object({
+  email: z.string().trim().email(),
+  role: z.enum(["admin", "hiring_manager", "member"]),
+});
+
+export async function addCompanyMember(formData: FormData) {
+  const companyId = formData.get("companyId");
+  if (typeof companyId !== "string") throw new Error("Missing company.");
+  await requireCompanyOwnerOrAdmin(companyId);
+
+  const parsed = addMemberSchema.safeParse({
+    email: formData.get("email"),
+    role: formData.get("role"),
+  });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+
+  const [targetUser] = await db.select().from(users).where(eq(users.email, parsed.data.email));
+  if (!targetUser) {
+    throw new Error("No Devworld account found with that email — they need to sign up first.");
+  }
+
+  await db
+    .insert(companyMemberships)
+    .values({ companyId, userId: targetUser.id, role: parsed.data.role })
+    .onConflictDoNothing();
+
+  revalidatePath(`/companies/${companyId}/members`);
+}
+
+export async function updateCompanyMemberRole(formData: FormData) {
+  const companyId = formData.get("companyId");
+  const membershipId = formData.get("membershipId");
+  const role = formData.get("role");
+  if (typeof companyId !== "string" || typeof membershipId !== "string") {
+    throw new Error("Missing fields.");
+  }
+  if (role !== "admin" && role !== "hiring_manager" && role !== "member") {
+    throw new Error("Invalid role.");
+  }
+  await requireCompanyOwnerOrAdmin(companyId);
+
+  const [target] = await db.select().from(companyMemberships).where(eq(companyMemberships.id, membershipId));
+  if (!target || target.companyId !== companyId) throw new Error("Not found.");
+  if (target.role === "owner") throw new Error("Can't change the owner's role.");
+
+  await db.update(companyMemberships).set({ role }).where(eq(companyMemberships.id, membershipId));
+  revalidatePath(`/companies/${companyId}/members`);
+}
+
+export async function removeCompanyMember(formData: FormData) {
+  const companyId = formData.get("companyId");
+  const membershipId = formData.get("membershipId");
+  if (typeof companyId !== "string" || typeof membershipId !== "string") {
+    throw new Error("Missing fields.");
+  }
+  await requireCompanyOwnerOrAdmin(companyId);
+
+  const [target] = await db.select().from(companyMemberships).where(eq(companyMemberships.id, membershipId));
+  if (!target || target.companyId !== companyId) throw new Error("Not found.");
+
+  if (target.role === "owner") {
+    const owners = await db
+      .select()
+      .from(companyMemberships)
+      .where(and(eq(companyMemberships.companyId, companyId), eq(companyMemberships.role, "owner")));
+    if (owners.length <= 1) {
+      throw new Error("Can't remove the last owner — transfer ownership first.");
+    }
+  }
+
+  await db.delete(companyMemberships).where(eq(companyMemberships.id, membershipId));
+  revalidatePath(`/companies/${companyId}/members`);
 }
