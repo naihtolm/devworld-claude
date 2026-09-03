@@ -9,8 +9,11 @@ import {
 } from "@clerk/nextjs";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { getUserRoles } from "@/modules/profiles/roles";
+import { getUnreadCount } from "@/modules/notifications/actions";
 import { ToastProvider } from "@/modules/ui/Toast";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
+import { BottomTabBar } from "@/modules/ui/BottomTabBar";
+import { MobileMenuSheet } from "@/modules/ui/MobileMenuSheet";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -35,13 +38,74 @@ export default async function RootLayout({
   const { userId: authProviderId } = await auth();
   let roles: Awaited<ReturnType<typeof getUserRoles>> | null = null;
   let dbUserId: string | null = null;
+  let unreadNotifications = 0;
   if (authProviderId) {
     const user = await ensureCurrentUser();
     if (user) {
       dbUserId = user.id;
       roles = await getUserRoles(user.id);
+      unreadNotifications = await getUnreadCount(user.id);
     }
   }
+
+  const homeHref = roles?.isClient ? "/dashboard?view=client" : roles?.isDeveloper ? "/dashboard?view=developer" : "/dashboard";
+
+  // Shared between the desktop "More" dropdown and the mobile bottom tab
+  // bar's "Menu" sheet — one role-gated link list, two presentations,
+  // rather than keeping two copies in sync.
+  const accountMenuLinks = (
+    <>
+      {roles?.isClient && (
+        <Link href="/dashboard?view=client" className={menuLinkClass}>
+          My projects
+        </Link>
+      )}
+      {roles?.isDeveloper && (
+        <>
+          <Link href="/dashboard?view=developer" className={menuLinkClass}>
+            My work
+          </Link>
+          <Link href="/proposals" className={menuLinkClass}>
+            My proposals
+          </Link>
+          <Link href="/invitations" className={menuLinkClass}>
+            Invitations
+          </Link>
+        </>
+      )}
+      {(roles?.isClient || roles?.isDeveloper) && <div className="my-1 border-t border-neutral-100" />}
+      {roles?.isDeveloper && (
+        <Link href="/profile/developer" className={menuLinkClass}>
+          Dev profile
+        </Link>
+      )}
+      {roles?.isClient && (
+        <Link href="/profile/client" className={menuLinkClass}>
+          Client profile
+        </Link>
+      )}
+      <Link href="/saved" className={menuLinkClass}>
+        Saved
+      </Link>
+      {(roles?.isClient || roles?.isDeveloper) && (
+        <Link href="/earnings" className={menuLinkClass}>
+          {roles?.isDeveloper && !roles?.isClient ? "Earnings" : roles?.isClient && !roles?.isDeveloper ? "Spending" : "Earnings & spending"}
+        </Link>
+      )}
+      <div className="my-1 border-t border-neutral-100" />
+      <Link href="/settings" className={menuLinkClass}>
+        Account settings
+      </Link>
+      {roles?.isAdmin && (
+        <>
+          <div className="my-1 border-t border-neutral-100" />
+          <Link href="/admin" className={menuLinkClass}>
+            Admin
+          </Link>
+        </>
+      )}
+    </>
+  );
 
   return (
     <ClerkProvider>
@@ -53,7 +117,11 @@ export default async function RootLayout({
                 <span className="h-2 w-2 rounded-full bg-brand-600" />
                 Devworld
               </Link>
-              <nav className="flex items-center gap-5">
+
+              {/* Desktop nav — hidden below `sm`, replaced by the hamburger
+                  (signed out) or bottom tab bar (signed in) instead of
+                  trying to cram this same row into a phone width. */}
+              <nav className="hidden items-center gap-5 sm:flex">
                 <Link href="/projects" className={navLinkClass}>
                   Browse projects
                 </Link>
@@ -80,55 +148,7 @@ export default async function RootLayout({
                       <span className="text-xs text-neutral-400">▾</span>
                     </summary>
                     <div className="absolute right-0 z-10 mt-2 w-48 rounded-card border border-neutral-200 bg-white py-1 shadow-popover">
-                      {roles?.isClient && (
-                        <Link href="/dashboard?view=client" className={menuLinkClass}>
-                          My projects
-                        </Link>
-                      )}
-                      {roles?.isDeveloper && (
-                        <>
-                          <Link href="/dashboard?view=developer" className={menuLinkClass}>
-                            My work
-                          </Link>
-                          <Link href="/proposals" className={menuLinkClass}>
-                            My proposals
-                          </Link>
-                          <Link href="/invitations" className={menuLinkClass}>
-                            Invitations
-                          </Link>
-                        </>
-                      )}
-                      {(roles?.isClient || roles?.isDeveloper) && <div className="my-1 border-t border-neutral-100" />}
-                      {roles?.isDeveloper && (
-                        <Link href="/profile/developer" className={menuLinkClass}>
-                          Dev profile
-                        </Link>
-                      )}
-                      {roles?.isClient && (
-                        <Link href="/profile/client" className={menuLinkClass}>
-                          Client profile
-                        </Link>
-                      )}
-                      <Link href="/saved" className={menuLinkClass}>
-                        Saved
-                      </Link>
-                      {(roles?.isClient || roles?.isDeveloper) && (
-                        <Link href="/earnings" className={menuLinkClass}>
-                          {roles?.isDeveloper && !roles?.isClient ? "Earnings" : roles?.isClient && !roles?.isDeveloper ? "Spending" : "Earnings & spending"}
-                        </Link>
-                      )}
-                      <div className="my-1 border-t border-neutral-100" />
-                      <Link href="/settings" className={menuLinkClass}>
-                        Account settings
-                      </Link>
-                      {roles?.isAdmin && (
-                        <>
-                          <div className="my-1 border-t border-neutral-100" />
-                          <Link href="/admin" className={menuLinkClass}>
-                            Admin
-                          </Link>
-                        </>
-                      )}
+                      {accountMenuLinks}
                     </div>
                   </details>
                 </SignedIn>
@@ -147,8 +167,52 @@ export default async function RootLayout({
                   <UserButton />
                 </SignedIn>
               </nav>
+
+              {/* Mobile chrome */}
+              <div className="flex items-center gap-3 sm:hidden">
+                <SignedIn>
+                  {dbUserId && <NotificationBell userId={dbUserId} />}
+                  <UserButton />
+                </SignedIn>
+                <SignedOut>
+                  <Link
+                    href="/sign-up"
+                    className="rounded-card bg-brand-600 px-3 py-1.5 text-sm font-medium text-white"
+                  >
+                    Sign up
+                  </Link>
+                  <MobileMenuSheet
+                    trigger={
+                      <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6">
+                        <path d="M3 5h14M3 10h14M3 15h14" strokeLinecap="round" />
+                      </svg>
+                    }
+                  >
+                    <Link href="/projects" className={menuLinkClass}>
+                      Browse projects
+                    </Link>
+                    <Link href="/developers" className={menuLinkClass}>
+                      Browse developers
+                    </Link>
+                    <div className="my-1 border-t border-neutral-100" />
+                    <Link href="/sign-in" className={menuLinkClass}>
+                      Sign in
+                    </Link>
+                  </MobileMenuSheet>
+                </SignedOut>
+              </div>
             </header>
-            {children}
+
+            {/* Bottom padding keeps page content clear of the fixed tab
+                bar — only applies when it's actually rendered (signed in,
+                mobile). */}
+            <div className={dbUserId ? "pb-16 sm:pb-0" : ""}>{children}</div>
+
+            {dbUserId && (
+              <BottomTabBar homeHref={homeHref} unreadNotifications={unreadNotifications}>
+                {accountMenuLinks}
+              </BottomTabBar>
+            )}
           </ToastProvider>
         </body>
       </html>
