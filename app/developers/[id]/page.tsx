@@ -11,6 +11,8 @@ import { AddPortfolioItemForm } from "@/modules/profiles/AddPortfolioItemForm";
 import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { Avatar } from "@/modules/profiles/Avatar";
 import { sendInvitation } from "@/modules/proposals/actions";
+import { isFavorited } from "@/modules/favorites/actions";
+import { FavoriteButton } from "@/modules/favorites/FavoriteButton";
 import { Button } from "@/modules/ui/Button";
 import { ReportForm } from "@/modules/admin/ReportForm";
 
@@ -51,6 +53,9 @@ export default async function DeveloperProfilePage({
           .where(and(eq(projects.clientUserId, currentUser.id), eq(projects.status, "published")))
       : [];
 
+  const favorited =
+    currentUser && !isOwner ? await isFavorited(currentUser.id, "developer_profile", profile.id) : false;
+
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       <div className="mb-4 flex items-start justify-between">
@@ -61,11 +66,21 @@ export default async function DeveloperProfilePage({
             {profile.headline && <p className="text-neutral-600">{profile.headline}</p>}
           </div>
         </div>
-        {isOwner && (
-          <Link href="/profile/developer" className="text-sm text-brand-600 underline">
-            Edit profile
-          </Link>
-        )}
+        <div className="flex items-center gap-3">
+          {currentUser && !isOwner && (
+            <FavoriteButton
+              targetType="developer_profile"
+              targetId={profile.id}
+              path={`/developers/${profile.id}`}
+              initialFavorited={favorited}
+            />
+          )}
+          {isOwner && (
+            <Link href="/profile/developer" className="text-sm text-brand-600 underline">
+              Edit profile
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3 text-sm text-neutral-500">

@@ -511,6 +511,22 @@ export const adminActions = pgTable("admin_actions", {
 });
 
 // ---------------------------------------------------------------------------
+// FAVORITES — DW-503. Same polymorphic targetType/targetId pattern as
+// `reports`, rather than two separate tables for saved developers vs
+// saved projects.
+// ---------------------------------------------------------------------------
+
+export const favorites = pgTable("favorites", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  targetType: varchar("target_type", { length: 50 }).notNull(), // 'developer_profile' | 'project'
+  targetId: uuid("target_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqueFavorite: uniqueIndex("favorites_unique").on(t.userId, t.targetType, t.targetId),
+}));
+
+// ---------------------------------------------------------------------------
 // RELATIONS — wires up Drizzle's relational query API for the core entities
 // ---------------------------------------------------------------------------
 

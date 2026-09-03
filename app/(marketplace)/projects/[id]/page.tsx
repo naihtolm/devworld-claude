@@ -14,6 +14,8 @@ import {
   developerProfiles,
 } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
+import { isFavorited } from "@/modules/favorites/actions";
+import { FavoriteButton } from "@/modules/favorites/FavoriteButton";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
 import { LinkButton } from "@/modules/ui/Button";
 import { ReportForm } from "@/modules/admin/ReportForm";
@@ -70,10 +72,22 @@ export default async function ProjectDetailPage({
     alreadyProposed = existing !== undefined;
   }
 
+  const favorited = currentUser && !isOwner ? await isFavorited(currentUser.id, "project", project.id) : false;
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <div className="mb-4 flex items-center justify-between">
-        <StatusBadge status={project.status} />
+        <div className="flex items-center gap-3">
+          <StatusBadge status={project.status} />
+          {currentUser && !isOwner && (
+            <FavoriteButton
+              targetType="project"
+              targetId={project.id}
+              path={`/projects/${project.id}`}
+              initialFavorited={favorited}
+            />
+          )}
+        </div>
         {isOwner && project.status === "draft" && (
           <Link href={`/projects/${project.id}/edit`} className="text-sm font-medium text-brand-600 underline">
             Finish &amp; publish
