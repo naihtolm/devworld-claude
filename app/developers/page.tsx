@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { developerProfiles, developerSkills, skills, users } from "@/db/schema";
 import { and, eq, exists, gte, lte, desc, sql } from "drizzle-orm";
+import { ensureCurrentUser } from "@/modules/auth/user";
 import { getClerkDisplay } from "@/modules/auth/clerkDisplay";
 import { getTrustSignal } from "@/modules/reviews/trust";
+import { isFavorited } from "@/modules/favorites/actions";
+import { FavoriteButton } from "@/modules/favorites/FavoriteButton";
 import { Avatar } from "@/modules/profiles/Avatar";
 import { Card } from "@/modules/ui/Card";
 
@@ -55,6 +59,9 @@ export default async function DevelopersPage({
 
   const allSkills = await db.select({ name: skills.name }).from(skills).orderBy(skills.name);
 
+  const { userId: authProviderId } = await auth();
+  const currentUser = authProviderId ? await ensureCurrentUser() : null;
+
   const developers = await Promise.all(
     rows.map(async ({ profile, user }) => {
       const { name, imageUrl } = await getClerkDisplay(user.authProviderId);
@@ -65,7 +72,19 @@ export default async function DevelopersPage({
         .innerJoin(skills, eq(developerSkills.skillId, skills.id))
         .where(eq(developerSkills.developerProfileId, profile.id))
         .limit(5);
-      return { profile, name: name ?? user.email, imageUrl, trust, skillNames: devSkills.map((s) => s.name) };
+      const favorited =
+        currentUser && currentUser.id !== profile.userId
+          ? await isFavorited(currentUser.id, "developer_profile", profile.id)
+          : false;
+      return {
+        profile,
+        name: name ?? user.email,
+        imageUrl,
+        trust,
+        skillNames: devSkills.map((s) => s.name),
+        favorited,
+        canFavorite: !!currentUser && currentUser.id !== profile.userId,
+      };
     })
   );
 
@@ -130,10 +149,13 @@ export default async function DevelopersPage({
         </p>
       ) : (
         <ul className="space-y-4">
-          {developers.map(({ profile, name, imageUrl, trust, skillNames }) => (
+          {developers.map(({ profile, name, imageUrl, trust, skillNames, favorited, canFavorite }) => (
             <li key={profile.id}>
-              <Card className="hover:shadow-popover">
-                <Link href={`/developers/${profile.id}`} className="flex items-start gap-4">
+              {/* FavoriteButton is a sibling of the Link, not nested inside
+                  it — a <button> inside an <a> would fire both the toggle
+                  and the navigation on click. */}
+              <Card className="flex items-start gap-2 hover:shadow-popover">
+                <Link href={`/developers/${profile.id}`} className="flex min-w-0 flex-1 items-start gap-4">
                   <Avatar name={name} imageUrl={imageUrl} size="md" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -158,6 +180,14 @@ export default async function DevelopersPage({
                     </div>
                   </div>
                 </Link>
+                {canFavorite && (
+                  <FavoriteButton
+                    targetType="developer_profile"
+                    targetId={profile.id}
+                    path="/developers"
+                    initialFavorited={favorited}
+                  />
+                )}
               </Card>
             </li>
           ))}

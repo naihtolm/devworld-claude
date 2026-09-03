@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { projects, projectSkills, skills } from "@/db/schema";
 import { and, desc, eq, exists, gte, lte, or, isNull, sql } from "drizzle-orm";
 import { CATEGORIES } from "@/modules/marketplace/categories";
+import { ensureCurrentUser } from "@/modules/auth/user";
+import { isFavorited } from "@/modules/favorites/actions";
+import { FavoriteButton } from "@/modules/favorites/FavoriteButton";
 import { Button } from "@/modules/ui/Button";
 import { Card } from "@/modules/ui/Card";
 
@@ -63,6 +67,19 @@ export default async function ProjectsPage({
     .limit(20);
 
   const allSkills = await db.select({ name: skills.name }).from(skills).orderBy(skills.name);
+
+  const { userId: authProviderId } = await auth();
+  const currentUser = authProviderId ? await ensureCurrentUser() : null;
+
+  const projectsWithFavorites = await Promise.all(
+    publishedProjects.map(async (project) => {
+      const favorited =
+        currentUser && currentUser.id !== project.clientUserId
+          ? await isFavorited(currentUser.id, "project", project.id)
+          : false;
+      return { project, favorited, canFavorite: !!currentUser && currentUser.id !== project.clientUserId };
+    })
+  );
 
   const hasFilters = q || category || skill || budgetMin || budgetMax;
 
@@ -131,12 +148,22 @@ export default async function ProjectsPage({
         </p>
       ) : (
         <ul className="space-y-4">
-          {publishedProjects.map((project) => (
+          {projectsWithFavorites.map(({ project, favorited, canFavorite }) => (
             <li key={project.id}>
               <Card className="hover:shadow-popover">
-                <Link href={`/projects/${project.id}`} className="font-medium text-neutral-900 hover:text-brand-600">
-                  {project.title}
-                </Link>
+                <div className="flex items-start justify-between gap-2">
+                  <Link href={`/projects/${project.id}`} className="font-medium text-neutral-900 hover:text-brand-600">
+                    {project.title}
+                  </Link>
+                  {canFavorite && (
+                    <FavoriteButton
+                      targetType="project"
+                      targetId={project.id}
+                      path="/projects"
+                      initialFavorited={favorited}
+                    />
+                  )}
+                </div>
                 <p className="mt-1 text-sm text-neutral-600">{project.description}</p>
                 <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
                   <span className="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-700">
