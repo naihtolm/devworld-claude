@@ -414,8 +414,8 @@ export default async function AgreementDetailPage({
       )}
 
       {agreement.status === "active" && allMilestonesPaid && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-card border border-emerald-200 bg-emerald-50 px-4 py-3">
-          <p className="text-sm text-emerald-800">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-card border border-[rgba(52,211,153,0.25)] bg-[rgba(52,211,153,0.08)] px-4 py-3">
+          <p className="text-sm text-[#6EE7B7]">
             Every milestone is paid — nothing left outstanding on this agreement.
           </p>
           <form action={markAgreementCompleted.bind(null, agreement.id)}>
@@ -428,7 +428,7 @@ export default async function AgreementDetailPage({
 
       {agreement.status === "active" && !allMilestonesPaid && (
         <div className="mb-4 flex items-center gap-3">
-          <p className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <p className="rounded-card border border-[rgba(52,211,153,0.25)] bg-[rgba(52,211,153,0.08)] px-4 py-3 text-sm text-[#6EE7B7]">
             Active — both parties have accepted.
           </p>
           <form action={markAgreementCompleted.bind(null, agreement.id)}>
@@ -482,7 +482,7 @@ export default async function AgreementDetailPage({
 
       {agreement.status !== "active" && agreement.status !== "completed" && agreement.status !== "disputed" && (
         myAcceptedAt ? (
-          <p className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="rounded-card border border-[rgba(251,191,36,0.25)] bg-[rgba(251,191,36,0.08)] px-4 py-3 text-sm text-[#FCD34D]">
             You&rsquo;ve accepted. Waiting on the other party.
           </p>
         ) : (
@@ -493,7 +493,7 @@ export default async function AgreementDetailPage({
       )}
 
       {agreement.status === "disputed" && (
-        <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="rounded-card border border-[rgba(248,113,113,0.25)] bg-[rgba(248,113,113,0.08)] px-4 py-3 text-sm text-[#FCA5A5]">
           Under dispute — an admin is reviewing this agreement.
         </p>
       )}

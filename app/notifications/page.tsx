@@ -49,7 +49,7 @@ export default async function NotificationsPage() {
           {notifications.map((n) => (
             <li key={n.id}>
               <Link href={n.href ?? "#"}>
-                <Card className={`hover:shadow-popover ${!n.readAt ? "border-brand-200 bg-brand-50/40" : ""}`}>
+                <Card className={`hover:border-brand-600 hover:shadow-popover ${!n.readAt ? "border-brand-200 bg-brand-50" : ""}`}>
                   <div className="flex items-start gap-2">
                     {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" />}
                     <div className={n.readAt ? "ml-3.5" : ""}>

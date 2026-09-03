@@ -150,7 +150,7 @@ export default async function ProjectsPage({
         <ul className="space-y-4">
           {projectsWithFavorites.map(({ project, favorited, canFavorite }) => (
             <li key={project.id}>
-              <Card className="hover:shadow-popover">
+              <Card className="hover:border-brand-600 hover:shadow-popover">
                 <div className="flex items-start justify-between gap-2">
                   <Link href={`/projects/${project.id}`} className="font-medium text-neutral-900 hover:text-brand-600">
                     {project.title}
@@ -166,7 +166,7 @@ export default async function ProjectsPage({
                 </div>
                 <p className="mt-1 text-sm text-neutral-600">{project.description}</p>
                 <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
-                  <span className="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-700">
+                  <span className="rounded-card border border-neutral-300 px-2 py-0.5 font-medium text-neutral-600">
                     {project.category}
                   </span>
                   <span className="capitalize">{project.budgetType}</span>

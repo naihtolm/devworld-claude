@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
         <ul className="space-y-3">
           {rows.map(({ dispute, project }) => (
             <li key={dispute.id}>
-              <Card className="hover:shadow-popover">
+              <Card className="hover:border-brand-600 hover:shadow-popover">
                 <div className="mb-1 flex items-center justify-between">
                   <Link href={`/admin/disputes/${dispute.id}`} className="font-medium hover:text-brand-600">
                     {dispute.reason}

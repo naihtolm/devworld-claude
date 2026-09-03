@@ -75,7 +75,7 @@ export async function ClientDashboard({ userId }: { userId: string }) {
       <ul className="space-y-3">
         {rows.map(({ project, proposalCount }) => (
           <li key={project.id}>
-            <Card className="hover:shadow-popover">
+            <Card className="hover:border-brand-600 hover:shadow-popover">
               <div className="mb-2 flex items-center justify-between">
                 <Link href={`/projects/${project.id}`} className="font-medium hover:text-brand-600">
                   {project.title}

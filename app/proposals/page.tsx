@@ -56,7 +56,7 @@ export default async function MyProposalsPage() {
                 <Link href={`/projects/${project.id}`} className="font-medium hover:underline">
                   {project.title}
                 </Link>
-                <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs capitalize text-neutral-600">
+                <span className="rounded-card bg-neutral-100 px-2 py-0.5 text-xs capitalize text-neutral-600">
                   {proposal.status}
                 </span>
               </div>

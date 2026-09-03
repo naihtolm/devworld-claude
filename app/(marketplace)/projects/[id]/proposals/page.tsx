@@ -60,7 +60,7 @@ export default async function ProjectProposalsPage({
         <ul className="space-y-4">
           {proposalsWithNames.map(({ proposal, developer, name, imageUrl, badge }) => (
             <li key={proposal.id}>
-              <Card className="hover:shadow-popover">
+              <Card className="hover:border-brand-600 hover:shadow-popover">
                 <div className="mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Avatar name={name} imageUrl={imageUrl} size="sm" />

@@ -51,7 +51,7 @@ export async function NotificationBell({ userId }: { userId: string }) {
               <li key={n.id}>
                 <Link
                   href={n.href ?? "#"}
-                  className={`flex gap-2 px-4 py-2.5 text-sm hover:bg-neutral-50 ${!n.readAt ? "bg-brand-50/50" : ""}`}
+                  className={`flex gap-2 px-4 py-2.5 text-sm hover:bg-neutral-200 ${!n.readAt ? "bg-brand-50" : ""}`}
                 >
                   {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" />}
                   <span className={n.readAt ? "ml-3.5" : ""}>
@@ -66,7 +66,7 @@ export async function NotificationBell({ userId }: { userId: string }) {
         )}
         <Link
           href="/notifications"
-          className="block border-t border-neutral-100 px-4 py-2 text-center text-xs text-brand-600 hover:bg-neutral-50"
+          className="block border-t border-neutral-100 px-4 py-2 text-center text-xs text-brand-600 hover:bg-neutral-200"
         >
           View all
         </Link>

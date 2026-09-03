@@ -145,7 +145,7 @@ export default async function ProjectDetailPage({
           <h2 className="mb-2 text-sm font-medium text-neutral-500">Required skills</h2>
           <ul className="flex flex-wrap gap-2">
             {requiredSkills.map((s) => (
-              <li key={s.name} className="rounded-full bg-brand-50 px-3 py-1 text-sm capitalize text-brand-700">
+              <li key={s.name} className="rounded-card border border-neutral-300 px-3 py-1 text-sm capitalize text-neutral-600">
                 {s.name}
               </li>
             ))}

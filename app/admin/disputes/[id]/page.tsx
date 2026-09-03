@@ -123,7 +123,7 @@ export default async function DisputeDetailPage({
       </div>
 
       {dispute.status === "resolved" || dispute.status === "closed" ? (
-        <div className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="rounded-card border border-[rgba(52,211,153,0.25)] bg-[rgba(52,211,153,0.08)] px-4 py-3 text-sm text-[#6EE7B7]">
           <p className="mb-1 font-medium">Resolution</p>
           <p>{dispute.resolution}</p>
         </div>

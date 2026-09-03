@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 const navLinkClass = "text-sm text-neutral-600 transition-colors hover:text-neutral-900";
-const menuLinkClass = "block px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900";
+const menuLinkClass = "block px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900";
 
 export default async function RootLayout({
   children,
@@ -113,9 +113,9 @@ export default async function RootLayout({
         <body>
           <ToastProvider>
             <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-6 py-4">
-              <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-                <span className="h-2 w-2 rounded-full bg-brand-600" />
-                Devworld
+              <Link href="/" className="flex items-center gap-2.5 font-mono text-base font-bold tracking-tight">
+                <span className="h-2 w-2 bg-brand-600" />
+                devworld<span className="text-brand-600">_</span>
               </Link>
 
               {/* Desktop nav — hidden below `sm`, replaced by the hamburger

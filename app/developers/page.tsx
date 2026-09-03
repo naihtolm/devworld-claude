@@ -154,14 +154,14 @@ export default async function DevelopersPage({
               {/* FavoriteButton is a sibling of the Link, not nested inside
                   it — a <button> inside an <a> would fire both the toggle
                   and the navigation on click. */}
-              <Card className="flex items-start gap-2 hover:shadow-popover">
+              <Card className="flex items-start gap-2 hover:border-brand-600 hover:shadow-popover">
                 <Link href={`/developers/${profile.id}`} className="flex min-w-0 flex-1 items-start gap-4">
                   <Avatar name={name} imageUrl={imageUrl} size="md" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium text-neutral-900">{name}</span>
                       {trust.badge === "rated" ? (
-                        <span className="shrink-0 text-xs text-amber-600">
+                        <span className="shrink-0 text-xs text-[#FCD34D]">
                           ★ {trust.average.toFixed(1)} ({trust.reviewCount})
                         </span>
                       ) : (
@@ -173,7 +173,7 @@ export default async function DevelopersPage({
                       {profile.hourlyRate && <span>${profile.hourlyRate}/hr</span>}
                       <span className="capitalize">{profile.availability}</span>
                       {skillNames.map((s) => (
-                        <span key={s} className="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-700">
+                        <span key={s} className="rounded-card border border-neutral-300 px-2 py-0.5 font-medium text-neutral-600">
                           {s}
                         </span>
                       ))}

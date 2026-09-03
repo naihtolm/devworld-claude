@@ -54,11 +54,11 @@ export default async function ClientProfilePage({
       <div className="mb-6 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
         {profile.location && <span>{profile.location}</span>}
         {trust.badge === "new" ? (
-          <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
+          <span className="rounded-card border border-neutral-300 px-2.5 py-0.5 text-xs font-medium text-neutral-600">
             New to Devworld
           </span>
         ) : (
-          <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+          <span className="rounded-card border border-[rgba(251,191,36,0.3)] bg-[rgba(251,191,36,0.12)] px-2.5 py-0.5 text-xs font-medium text-[#FCD34D]">
             {"★"} {trust.average.toFixed(1)} ({trust.reviewCount}) · {trust.completedCount} completed
           </span>
         )}

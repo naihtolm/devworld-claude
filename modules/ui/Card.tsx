@@ -1,8 +1,11 @@
 import type { HTMLAttributes } from "react";
 import Link from "next/link";
 
-const base = "rounded-card border border-neutral-200 bg-white p-4 shadow-card transition-shadow";
-const interactive = "hover:shadow-popover";
+const base = "rounded-card border border-neutral-200 bg-white p-4 shadow-card transition-all";
+// The signature hover: border brightens to the accent and glows outward
+// (shadow-popover is the lime glow token), not a soft lift — see
+// tailwind.config.ts.
+const interactive = "hover:border-brand-600 hover:shadow-popover";
 
 // The pattern this replaces (`rounded-lg border border-neutral-200 bg-white
 // p-4 shadow-sm`) was copy-pasted inline on every list screen — one place

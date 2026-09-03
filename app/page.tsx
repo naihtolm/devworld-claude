@@ -11,15 +11,17 @@ import { LinkCard } from "@/modules/ui/Card";
 // can hang the whole build rather than just a request.
 export const dynamic = "force-dynamic";
 
-const CATEGORY_ICONS: Record<string, string> = {
-  "Web Development": "🌐",
-  "Mobile Development": "📱",
-  "AI / ML": "🤖",
-  "Cloud / DevOps": "☁️",
-  "Data Engineering": "🗄️",
-  Design: "🎨",
-  "QA / Testing": "🧪",
-  Other: "🧩",
+// Bracket-mono tags, not emoji — matches the approved Terminal direction's
+// category treatment (design canvas, DesignSystem/Main artboards).
+const CATEGORY_TAGS: Record<string, string> = {
+  "Web Development": "web",
+  "Mobile Development": "mobile",
+  "AI / ML": "ai/ml",
+  "Cloud / DevOps": "cloud",
+  "Data Engineering": "data",
+  Design: "design",
+  "QA / Testing": "qa",
+  Other: "other",
 };
 
 export default async function HomePage() {
@@ -52,56 +54,77 @@ export default async function HomePage() {
 
   return (
     <main>
-      <div className="mx-auto flex min-h-[75vh] max-w-5xl flex-col items-center justify-center gap-8 px-6 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Find technical talent.
+      <div className="mx-auto flex min-h-[75vh] max-w-5xl flex-col items-center justify-center gap-7 px-6 text-center">
+        <p
+          className="fadeup font-mono text-sm text-neutral-500"
+          style={{ animationDelay: "0.1s" }}
+        >
+          <span className="text-brand-600">$</span> devworld init --marketplace
+        </p>
+
+        <h1 className="font-mono text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
+          {/* 22 characters — --tw-chars must match, or the caret overshoots
+              (a real bug caught in the design canvas review before this
+              shipped: width animating against the wrong basis). */}
+          <span className="typewriter" style={{ "--tw-chars": "22ch" } as React.CSSProperties}>
+            Find technical talent.
+          </span>
           <br />
-          Build great products.
+          <span className="fadeup" style={{ animationDelay: "1.9s" }}>
+            Build great products.
+          </span>
         </h1>
-        <p className="max-w-xl text-lg text-neutral-600">
+
+        <p className="fadeup max-w-xl text-lg text-neutral-600" style={{ animationDelay: "2.1s" }}>
           Devworld connects businesses with developers, AI/ML engineers, cloud
           specialists, and other technical professionals — for quick tasks,
           fixed-price projects, and ongoing work.
         </p>
-        <div className="flex gap-4">
+        <div className="fadeup flex gap-4" style={{ animationDelay: "2.25s" }}>
           <Link
             href="/projects"
-            className="rounded-md bg-brand-600 px-5 py-3 font-medium text-white transition-colors hover:bg-brand-700"
+            className="rounded-card bg-brand-600 px-5 py-3 font-mono font-medium text-white transition-shadow hover:shadow-glow"
           >
-            Find Talent
+            Find Talent →
           </Link>
           <Link
             href="/projects"
-            className="rounded-md border border-neutral-300 px-5 py-3 font-medium transition-colors hover:bg-neutral-50"
+            className="rounded-card border border-neutral-300 px-5 py-3 font-medium transition-colors hover:border-brand-600"
           >
             Find Work
           </Link>
         </div>
 
-        <dl className="mt-4 flex gap-10 sm:gap-16">
+        <dl className="fadeup mt-4 flex gap-10 font-mono sm:gap-16" style={{ animationDelay: "2.4s" }}>
           <div>
-            <dt className="text-3xl font-semibold text-brand-600">{activeProjects}+</dt>
-            <dd className="text-sm text-neutral-500">Active projects</dd>
+            <dt className="text-3xl font-bold text-brand-600">{activeProjects}+</dt>
+            <dd className="text-xs text-neutral-500">active_projects</dd>
           </div>
           <div>
-            <dt className="text-3xl font-semibold text-brand-600">{developers}+</dt>
-            <dd className="text-sm text-neutral-500">Developers</dd>
+            <dt className="text-3xl font-bold text-brand-600">{developers}+</dt>
+            <dd className="text-xs text-neutral-500">developers</dd>
           </div>
           <div>
-            <dt className="text-3xl font-semibold text-brand-600">{completed}+</dt>
-            <dd className="text-sm text-neutral-500">Completed</dd>
+            <dt className="text-3xl font-bold text-brand-600">{completed}+</dt>
+            <dd className="text-xs text-neutral-500">completed</dd>
           </div>
         </dl>
       </div>
 
       <div className="mx-auto max-w-5xl px-6 pb-16">
-        <h2 className="mb-4 text-lg font-semibold">Browse by category</h2>
+        <h2 className="mb-4 font-mono text-xs uppercase tracking-wider text-neutral-500">
+          {"// browse_by_category"}
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {CATEGORIES.map((category) => (
             <LinkCard key={category} href={`/projects?category=${encodeURIComponent(category)}`}>
-              <span className="mb-2 block text-2xl">{CATEGORY_ICONS[category] ?? "🧩"}</span>
+              <span className="mb-2 block font-mono text-sm text-brand-600">
+                [{CATEGORY_TAGS[category] ?? "other"}]
+              </span>
               <span className="block text-sm font-medium">{category}</span>
-              <span className="text-xs text-neutral-400">{countByCategory.get(category) ?? 0} projects</span>
+              <span className="font-mono text-xs text-neutral-500">
+                {countByCategory.get(category) ?? 0} open
+              </span>
             </LinkCard>
           ))}
         </div>
@@ -110,9 +133,11 @@ export default async function HomePage() {
       {recentProjects.length > 0 && (
         <div className="mx-auto max-w-5xl px-6 pb-16">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recently posted</h2>
-            <Link href="/projects" className="text-sm text-brand-600 underline">
-              Browse all
+            <h2 className="font-mono text-xs uppercase tracking-wider text-neutral-500">
+              {"// recently_posted"}
+            </h2>
+            <Link href="/projects" className="font-mono text-sm text-brand-600 underline">
+              browse_all →
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -121,10 +146,10 @@ export default async function HomePage() {
                 <p className="font-medium text-neutral-900">{project.title}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-neutral-600">{project.description}</p>
                 <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
-                  <span className="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-700">
+                  <span className="rounded-card border border-neutral-300 px-2 py-0.5 font-mono font-medium text-neutral-600">
                     {project.category}
                   </span>
-                  <span className="capitalize">{project.budgetType}</span>
+                  <span className="font-mono capitalize">{project.budgetType}</span>
                 </p>
               </LinkCard>
             ))}

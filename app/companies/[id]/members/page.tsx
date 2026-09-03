@@ -91,7 +91,7 @@ export default async function CompanyMembersPage({ params }: { params: Promise<{
                   <form action={removeCompanyMember}>
                     <input type="hidden" name="companyId" value={id} />
                     <input type="hidden" name="membershipId" value={membership.id} />
-                    <Button type="submit" variant="ghost" size="sm" className="p-0 text-red-500 hover:text-red-700">
+                    <Button type="submit" variant="ghost" size="sm" className="p-0 text-[#F87171] hover:text-[#FCA5A5]">
                       Remove
                     </Button>
                   </form>

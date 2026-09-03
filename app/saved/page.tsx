@@ -59,7 +59,7 @@ export default async function SavedPage() {
           {developers.map(({ profile, name, imageUrl }) => (
             <li key={profile.id}>
               <Link href={`/developers/${profile.id}`}>
-                <Card className="flex items-center gap-3 hover:shadow-popover">
+                <Card className="flex items-center gap-3 hover:border-brand-600 hover:shadow-popover">
                   <Avatar name={name} imageUrl={imageUrl} size="sm" />
                   <div>
                     <p className="text-sm font-medium">{name}</p>
@@ -80,7 +80,7 @@ export default async function SavedPage() {
           {savedProjects.map((project) => (
             <li key={project.id}>
               <Link href={`/projects/${project.id}`}>
-                <Card className="flex items-center justify-between hover:shadow-popover">
+                <Card className="flex items-center justify-between hover:border-brand-600 hover:shadow-popover">
                   <p className="text-sm font-medium">{project.title}</p>
                   <StatusBadge status={project.status} />
                 </Card>

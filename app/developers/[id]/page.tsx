@@ -88,11 +88,11 @@ export default async function DeveloperProfilePage({
         {profile.location && <span>{profile.location}</span>}
         <span className="capitalize">{profile.availability}</span>
         {trust.badge === "new" ? (
-          <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
+          <span className="rounded-card border border-neutral-300 px-2.5 py-0.5 text-xs font-medium text-neutral-600">
             New to Devworld
           </span>
         ) : (
-          <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+          <span className="rounded-card border border-[rgba(251,191,36,0.3)] bg-[rgba(251,191,36,0.12)] px-2.5 py-0.5 text-xs font-medium text-[#FCD34D]">
             {"★"} {trust.average.toFixed(1)} ({trust.reviewCount}) · {trust.completedCount} completed
           </span>
         )}
@@ -161,7 +161,7 @@ export default async function DeveloperProfilePage({
           <h2 className="mb-2 text-sm font-medium text-neutral-500">Skills</h2>
           <ul className="flex flex-wrap gap-2">
             {devSkills.map((s) => (
-              <li key={s.name} className="rounded-full bg-brand-50 px-3 py-1 text-sm capitalize text-brand-700">
+              <li key={s.name} className="rounded-card border border-neutral-300 px-3 py-1 text-sm capitalize text-neutral-600">
                 {s.name}
               </li>
             ))}

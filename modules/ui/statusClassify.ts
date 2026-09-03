@@ -43,12 +43,17 @@ const INFO = new Set([
   "in_progress",
 ]);
 
+// Literal dark-adapted values, not Tailwind's built-in emerald/amber/red/
+// blue scales — those aren't overridden by the Terminal theme (only
+// neutral/white/brand are), so bg-emerald-50 etc. would still render as
+// pale light-mode colors on a near-black page. Matches the approved
+// design canvas's dark status-color set exactly.
 export const STATUS_STYLES = {
-  danger: "bg-red-50 text-red-700",
-  success: "bg-emerald-50 text-emerald-700",
-  warning: "bg-amber-50 text-amber-700",
-  info: "bg-blue-50 text-blue-700",
-  neutral: "bg-neutral-100 text-neutral-600",
+  danger: "border border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.12)] text-[#FCA5A5]",
+  success: "border border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)] text-[#6EE7B7]",
+  warning: "border border-[rgba(251,191,36,0.3)] bg-[rgba(251,191,36,0.12)] text-[#FCD34D]",
+  info: "border border-[rgba(96,165,250,0.3)] bg-[rgba(96,165,250,0.12)] text-[#93C5FD]",
+  neutral: "border border-neutral-200 bg-neutral-100 text-neutral-600",
 } as const;
 
 // One place that maps every status string used across the app (project,
