@@ -6,6 +6,8 @@ import { CATEGORIES } from "@/modules/marketplace/categories";
 import { LinkCard } from "@/modules/ui/Card";
 import { getPlatformTrustSummary, getFeaturedReviews, shouldShowTrustSection, trustSectionSubcopy } from "@/modules/reviews/platformTrust";
 import { TrustSection } from "@/modules/marketplace/TrustSection";
+import { getRecentCompletedWork } from "@/modules/marketplace/spotlight";
+import { SpotlightSection } from "@/modules/marketplace/SpotlightSection";
 
 // Live counts, not something to freeze at build time — also sidesteps
 // Next.js attempting to statically prerender this against the database
@@ -44,6 +46,7 @@ export default async function HomePage() {
   const featuredReviews = shouldShowTrustSection(trustSummary.totalReviews)
     ? await getFeaturedReviews(3)
     : [];
+  const recentCompletedWork = await getRecentCompletedWork(3);
   const categoryCounts = await db
     .select({ category: projects.category, count: count() })
     .from(projects)
@@ -127,6 +130,8 @@ export default async function HomePage() {
         featured={featuredReviews}
         subcopy={trustSectionSubcopy(trustSummary.totalReviews)}
       />
+
+      <SpotlightSection recentWork={recentCompletedWork} />
 
       <div className="mx-auto max-w-5xl px-6 pb-16">
         <h2 className="mb-4 font-mono text-xs uppercase tracking-wider text-neutral-500">
