@@ -32,6 +32,9 @@ export function ConfirmDialog({
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
+  // bg-black, not bg-neutral-900, on the backdrop below — see
+  // MobileMenuSheet for why: the inverted dark scale makes neutral-900
+  // near-white, wrong for a dimming backdrop.
   return (
     <dialog
       ref={ref}
@@ -43,7 +46,7 @@ export function ConfirmDialog({
         // Click on the backdrop (the dialog element itself, not its content) cancels.
         if (e.target === ref.current) onCancel();
       }}
-      className="rounded-card border border-neutral-200 p-0 shadow-popover backdrop:bg-neutral-900/40"
+      className="rounded-card border border-neutral-200 p-0 shadow-popover backdrop:bg-black/60"
     >
       <div className="w-80 p-5 sm:w-96">
         <h2 className="mb-2 text-h2">{title}</h2>

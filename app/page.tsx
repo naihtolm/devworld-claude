@@ -62,7 +62,12 @@ export default async function HomePage() {
           <span className="text-brand-600">$</span> devworld init --marketplace
         </p>
 
-        <h1 className="font-mono text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
+        {/* Monospace runs noticeably wider per-character than the
+            proportional font this replaced — text-4xl (the old mobile
+            baseline) overflowed a 375px viewport. text-xl is the largest
+            size that keeps a 22-character line inside a phone's width
+            with the hero's px-6 padding. */}
+        <h1 className="font-mono text-xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
           {/* 22 characters — --tw-chars must match, or the caret overshoots
               (a real bug caught in the design canvas review before this
               shipped: width animating against the wrong basis). */}

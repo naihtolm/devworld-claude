@@ -22,8 +22,12 @@ export function MobileMenuSheet({
       </button>
       {open && (
         <div className="fixed inset-0 z-50 sm:hidden">
+          {/* bg-black, not bg-neutral-900 — neutral-900 is near-white
+              under the inverted dark scale (see tailwind.config.ts), so a
+              dimming backdrop needs a color the theme inversion doesn't
+              touch. `black` wasn't overridden, only `white` was. */}
           <div
-            className="absolute inset-0 bg-neutral-900/40"
+            className="absolute inset-0 bg-black/60"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
