@@ -60,7 +60,7 @@ export default async function DashboardPage({
       {view === "client" ? (
         <ClientDashboard userId={user.id} />
       ) : (
-        <DeveloperDashboard developerProfileId={roles.developerProfileId!} />
+        <DeveloperDashboard userId={user.id} developerProfileId={roles.developerProfileId!} />
       )}
     </main>
   );

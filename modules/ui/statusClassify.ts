@@ -56,6 +56,18 @@ export const STATUS_STYLES = {
   neutral: "border border-neutral-200 bg-neutral-100 text-neutral-600",
 } as const;
 
+// Same four status colors as STATUS_STYLES, as plain hex — for contexts that
+// need a raw color value rather than a Tailwind class string (e.g. a bar
+// chart fill), so both stay backed by one definition instead of duplicating
+// the hex literals.
+export const STATUS_HEX: Record<keyof typeof STATUS_STYLES, string> = {
+  danger: "#FCA5A5",
+  success: "#6EE7B7",
+  warning: "#FCD34D",
+  info: "#93C5FD",
+  neutral: "#A1A1AA",
+};
+
 // One place that maps every status string used across the app (project,
 // proposal, agreement, milestone, payment, dispute) to a consistent color —
 // the same word ("active", "completed", "declined"...) always reads the

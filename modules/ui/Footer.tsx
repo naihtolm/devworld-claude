@@ -22,6 +22,9 @@ export function Footer() {
             <Link href="/projects/new" className={linkClass}>
               Post a project
             </Link>
+            <Link href="/trends" className={linkClass}>
+              Rate trends
+            </Link>
           </nav>
         </div>
         <div>
@@ -35,6 +38,9 @@ export function Footer() {
             </Link>
             <Link href="/faq" className={linkClass}>
               FAQ
+            </Link>
+            <Link href="/guides" className={linkClass}>
+              Guides
             </Link>
             <Link href="/spotlight" className={linkClass}>
               Spotlight

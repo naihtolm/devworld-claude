@@ -548,6 +548,23 @@ export const favorites = pgTable("favorites", {
 }));
 
 // ---------------------------------------------------------------------------
+// PROJECT VIEWS — powers "projects like ones you've viewed"
+// (modules/marketplace/recommendations.ts). One row per (user, project);
+// re-viewing bumps createdAt via upsert instead of accumulating duplicate
+// rows, so "most recently viewed" stays meaningful without needing a count.
+// ---------------------------------------------------------------------------
+
+export const projectViews = pgTable("project_views", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  uniqueView: uniqueIndex("project_views_unique").on(t.userId, t.projectId),
+  userIdx: index("project_views_user_idx").on(t.userId),
+}));
+
+// ---------------------------------------------------------------------------
 // RELATIONS — wires up Drizzle's relational query API for the core entities
 // ---------------------------------------------------------------------------
 

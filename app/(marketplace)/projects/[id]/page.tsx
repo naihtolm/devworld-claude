@@ -14,6 +14,7 @@ import {
   developerProfiles,
 } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
+import { recordProjectView } from "@/modules/marketplace/projectViews";
 import { isFavorited } from "@/modules/favorites/actions";
 import { FavoriteButton } from "@/modules/favorites/FavoriteButton";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
@@ -61,6 +62,14 @@ export default async function ProjectDetailPage({
   const { userId: authProviderId } = await auth();
   const currentUser = authProviderId ? await ensureCurrentUser() : null;
   const isOwner = currentUser?.id === project.clientUserId;
+
+  // Powers "projects like ones you've viewed" on the developer dashboard —
+  // see modules/marketplace/recommendations.ts. Only for signed-in visitors
+  // looking at someone else's project; a client viewing their own listing
+  // isn't a browsing signal.
+  if (currentUser && !isOwner) {
+    await recordProjectView(currentUser.id, project.id);
+  }
 
   let alreadyProposed = false;
   if (currentUser && !isOwner) {

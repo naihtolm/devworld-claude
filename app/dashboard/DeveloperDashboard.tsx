@@ -2,11 +2,20 @@ import Link from "next/link";
 import { and, eq, desc, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { agreements, proposals, projects, payments } from "@/db/schema";
+import { getRecommendedProjects } from "@/modules/marketplace/recommendations";
+import { getProposalAnalytics, PROPOSAL_STATUS_ORDER } from "@/modules/marketplace/proposalAnalytics";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
+import { classify, STATUS_HEX } from "@/modules/ui/statusClassify";
 import { LinkButton } from "@/modules/ui/Button";
-import { Card } from "@/modules/ui/Card";
+import { Card, LinkCard } from "@/modules/ui/Card";
 
-export async function DeveloperDashboard({ developerProfileId }: { developerProfileId: string }) {
+export async function DeveloperDashboard({
+  userId,
+  developerProfileId,
+}: {
+  userId: string;
+  developerProfileId: string;
+}) {
   const proposalRows = await db
     .select({ proposal: proposals, project: projects })
     .from(proposals)
@@ -37,14 +46,41 @@ export async function DeveloperDashboard({ developerProfileId }: { developerProf
         )
     : [];
 
+  const analytics = await getProposalAnalytics(developerProfileId);
+  const recommended = await getRecommendedProjects(userId, developerProfileId);
+
+  const recommendedSection = recommended.length > 0 && (
+    <div className="mt-8">
+      <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">
+        {"// projects_like_ones_you_viewed"}
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {recommended.map((project) => (
+          <LinkCard key={project.id} href={`/projects/${project.id}`}>
+            <p className="font-medium text-neutral-900">{project.title}</p>
+            <p className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
+              <span className="rounded-card border border-neutral-300 px-2 py-0.5 font-mono font-medium text-neutral-600">
+                {project.category}
+              </span>
+              <span className="font-mono capitalize">{project.budgetType}</span>
+            </p>
+          </LinkCard>
+        ))}
+      </div>
+    </div>
+  );
+
   if (proposalRows.length === 0 && agreementRows.length === 0) {
     return (
-      <div className="rounded-card border border-neutral-200 bg-white px-8 py-12 text-center shadow-card">
-        <h1 className="mb-2 text-h1">Find your first project</h1>
-        <p className="mx-auto mb-6 max-w-md text-neutral-600">
-          Browse published projects and submit a proposal — your profile and portfolio go with it.
-        </p>
-        <LinkButton href="/projects">browse_projects</LinkButton>
+      <div>
+        <div className="rounded-card border border-neutral-200 bg-white px-8 py-12 text-center shadow-card">
+          <h1 className="mb-2 text-h1">Find your first project</h1>
+          <p className="mx-auto mb-6 max-w-md text-neutral-600">
+            Browse published projects and submit a proposal — your profile and portfolio go with it.
+          </p>
+          <LinkButton href="/projects">browse_projects</LinkButton>
+        </div>
+        {recommendedSection}
       </div>
     );
   }
@@ -74,6 +110,55 @@ export async function DeveloperDashboard({ developerProfileId }: { developerProf
         ))}
       </dl>
 
+      {analytics.total > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">
+            {"// proposal_analytics"}
+          </h2>
+          <div className="mb-3 grid grid-cols-2 gap-3">
+            <Card>
+              <dt className="font-mono text-xs text-neutral-500">win_rate</dt>
+              <dd className="font-mono text-2xl font-semibold text-brand-600 tabular-nums">
+                {analytics.winRate === null ? "—" : `${Math.round(analytics.winRate * 100)}%`}
+              </dd>
+              {analytics.winRate === null && (
+                <p className="mt-1 text-xs text-neutral-500">No decided proposals yet</p>
+              )}
+            </Card>
+            <Card>
+              <dt className="font-mono text-xs text-neutral-500">total_proposals</dt>
+              <dd className="font-mono text-2xl font-semibold text-brand-600 tabular-nums">{analytics.total}</dd>
+            </Card>
+          </div>
+          <Card>
+            <div className="space-y-2">
+              {analytics.breakdown
+                .filter((s) => s.count > 0)
+                .sort((a, b) => PROPOSAL_STATUS_ORDER.indexOf(a.status) - PROPOSAL_STATUS_ORDER.indexOf(b.status))
+                .map(({ status, count }) => (
+                  <div key={status} className="flex items-center gap-3">
+                    <span className="w-24 shrink-0 font-mono text-xs capitalize text-neutral-500">
+                      {status.replace(/_/g, " ")}
+                    </span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-card bg-neutral-200">
+                      <div
+                        className="h-full rounded-card"
+                        style={{
+                          width: `${(count / analytics.total) * 100}%`,
+                          backgroundColor: STATUS_HEX[classify(status)],
+                        }}
+                      />
+                    </div>
+                    <span className="w-6 shrink-0 text-right font-mono text-xs tabular-nums text-neutral-500">
+                      {count}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
       <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">
         {"// recent_proposals"}
       </h2>
@@ -95,6 +180,8 @@ export async function DeveloperDashboard({ developerProfileId }: { developerProf
           </li>
         ))}
       </ul>
+
+      {recommendedSection}
     </div>
   );
 }
