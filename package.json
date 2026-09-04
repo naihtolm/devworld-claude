@@ -11,7 +11,9 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed-skills": "tsx scripts/seed-skills.ts"
+    "db:seed-skills": "tsx scripts/seed-skills.ts",
+    "db:seed-trends": "tsx scripts/seed-hourly-rate-demo.ts",
+    "db:unseed-trends": "tsx scripts/delete-hourly-rate-demo.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.0.0",
