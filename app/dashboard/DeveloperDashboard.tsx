@@ -44,7 +44,7 @@ export async function DeveloperDashboard({ developerProfileId }: { developerProf
         <p className="mx-auto mb-6 max-w-md text-neutral-600">
           Browse published projects and submit a proposal — your profile and portfolio go with it.
         </p>
-        <LinkButton href="/projects">Browse projects</LinkButton>
+        <LinkButton href="/projects">browse_projects</LinkButton>
       </div>
     );
   }
@@ -52,27 +52,31 @@ export async function DeveloperDashboard({ developerProfileId }: { developerProf
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-h1">My Work</h1>
+        <h1 className="font-mono text-h1">
+          <span className="text-brand-600">$</span> my_work
+        </h1>
         <LinkButton href="/projects" size="sm">
-          Browse projects
+          browse_projects
         </LinkButton>
       </div>
 
       <dl className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Active agreements", value: activeAgreements },
-          { label: "Proposals sent", value: proposalRows.length },
-          { label: "Earned", value: `$${Number(earned).toLocaleString()}` },
-          { label: "Completed", value: completedAgreements },
+          { label: "active", value: activeAgreements },
+          { label: "proposals_sent", value: proposalRows.length },
+          { label: "earned", value: `$${Number(earned).toLocaleString()}` },
+          { label: "completed", value: completedAgreements },
         ].map((stat) => (
           <Card key={stat.label}>
-            <dt className="text-xs text-neutral-500">{stat.label}</dt>
-            <dd className="text-2xl font-semibold text-brand-600 tabular-nums">{stat.value}</dd>
+            <dt className="font-mono text-xs text-neutral-500">{stat.label}</dt>
+            <dd className="font-mono text-2xl font-semibold text-brand-600 tabular-nums">{stat.value}</dd>
           </Card>
         ))}
       </dl>
 
-      <h2 className="mb-3 text-h2">Recent proposals</h2>
+      <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">
+        {"// recent_proposals"}
+      </h2>
       <ul className="space-y-3">
         {proposalRows.map(({ proposal, project }) => (
           <li key={proposal.id}>

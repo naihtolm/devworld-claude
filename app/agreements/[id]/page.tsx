@@ -102,13 +102,13 @@ export default async function AgreementDetailPage({
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       {project && (
-        <Link href={`/projects/${project.id}`} className="mb-6 inline-block text-sm text-neutral-500 underline">
-          ← Back to project
+        <Link href={`/projects/${project.id}`} className="mb-6 inline-block font-mono text-sm text-neutral-500 underline">
+          ← back_to_project
         </Link>
       )}
 
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-h1">{project?.title ?? "Agreement"}</h1>
+        <h1 className="font-mono text-h1">{project?.title ?? "Agreement"}</h1>
         <StatusBadge status={agreement.status} />
       </div>
 
@@ -139,19 +139,19 @@ export default async function AgreementDetailPage({
           )}
         </p>
         <form action={getOrCreateAgreementConversation.bind(null, agreement.id)}>
-          <Button type="submit" variant="ghost" size="sm" className="p-0">
-            Message {isClient ? developerName : "client"}
+          <Button type="submit" variant="ghost" size="sm" className="p-0 font-mono">
+            message_{isClient ? developerName : "client"}
           </Button>
         </form>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
+      <div className="mb-6 grid grid-cols-2 gap-4 font-mono text-sm">
         <div>
-          <dt className="text-neutral-500">Budget type</dt>
+          <dt className="text-neutral-500">budget_type</dt>
           <dd className="font-medium capitalize">{agreement.budgetType}</dd>
         </div>
         <div>
-          <dt className="text-neutral-500">Amount</dt>
+          <dt className="text-neutral-500">amount</dt>
           <dd className="font-medium">
             {agreement.budgetType === "hourly"
               ? `$${agreement.hourlyRate ?? "—"}/hr`
@@ -161,14 +161,14 @@ export default async function AgreementDetailPage({
       </div>
 
       <div className="mb-8">
-        <h2 className="mb-2 text-sm font-medium text-neutral-500">Scope</h2>
+        <h2 className="mb-2 font-mono text-xs uppercase tracking-wider text-neutral-500">{"// scope"}</h2>
         <p className="whitespace-pre-wrap text-neutral-700">{agreement.scopeDescription}</p>
       </div>
 
       {agreement.budgetType !== "hourly" && (
       <div className="mb-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-neutral-500">Milestones</h2>
+          <h2 className="font-mono text-xs uppercase tracking-wider text-neutral-500">{"// milestones"}</h2>
         </div>
         {agreementMilestones.length === 0 ? (
           <p className="text-sm text-neutral-400">No milestones yet.</p>
@@ -188,8 +188,8 @@ export default async function AgreementDetailPage({
                   {isClient && agreement.status === "active" && m.status === "pending" && (
                     developerStripeReady ? (
                       <form action={fundMilestone.bind(null, m.id)}>
-                        <Button type="submit" size="sm">
-                          Fund milestone
+                        <Button type="submit" size="sm" className="font-mono">
+                          fund_milestone
                         </Button>
                       </form>
                     ) : (
@@ -198,15 +198,15 @@ export default async function AgreementDetailPage({
                   )}
                   {isDeveloper && m.status === "funded" && (
                     <form action={submitMilestoneWork.bind(null, m.id)}>
-                      <Button type="submit" size="sm">
-                        Submit work
+                      <Button type="submit" size="sm" className="font-mono">
+                        submit_work
                       </Button>
                     </form>
                   )}
                   {isClient && m.status === "submitted" && (
                     <form action={approveMilestone.bind(null, m.id)}>
-                      <Button type="submit" size="sm">
-                        Approve &amp; pay
+                      <Button type="submit" size="sm" className="font-mono">
+                        approve_and_pay
                       </Button>
                     </form>
                   )}
@@ -252,8 +252,8 @@ export default async function AgreementDetailPage({
               type="date"
               className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
             />
-            <Button type="submit" variant="secondary" size="sm">
-              Add milestone
+            <Button type="submit" variant="secondary" size="sm" className="font-mono">
+              + add_milestone
             </Button>
           </form>
         )}
@@ -262,7 +262,7 @@ export default async function AgreementDetailPage({
 
       {agreement.budgetType === "hourly" && (
         <div className="mb-8">
-          <h2 className="mb-3 text-sm font-medium text-neutral-500">Hourly invoices</h2>
+          <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">{"// hourly_invoices"}</h2>
           {hourlyInvoices.length === 0 ? (
             <p className="mb-4 text-sm text-neutral-400">No invoices yet.</p>
           ) : (
@@ -279,8 +279,8 @@ export default async function AgreementDetailPage({
                   {isClient && inv.status === "pending" ? (
                     developerStripeReady ? (
                       <form action={payHourlyInvoice.bind(null, inv.id)}>
-                        <Button type="submit" size="sm">
-                          Pay invoice
+                        <Button type="submit" size="sm" className="font-mono">
+                          pay_invoice
                         </Button>
                       </form>
                     ) : (
@@ -315,8 +315,8 @@ export default async function AgreementDetailPage({
                   className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
                 />
               </div>
-              <Button type="submit" variant="secondary" size="sm">
-                Submit invoice
+              <Button type="submit" variant="secondary" size="sm" className="font-mono">
+                submit_invoice
               </Button>
             </form>
           )}
@@ -325,7 +325,7 @@ export default async function AgreementDetailPage({
 
       {agreement.status === "active" && (
         <div className="mb-8">
-          <h2 className="mb-3 text-sm font-medium text-neutral-500">Change requests</h2>
+          <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">{"// change_requests"}</h2>
           {agreementChangeRequests.length > 0 && (
             <ul className="mb-4 space-y-2">
               {agreementChangeRequests.map((cr) => (
@@ -348,15 +348,15 @@ export default async function AgreementDetailPage({
                       <form action={respondToChangeRequest}>
                         <input type="hidden" name="changeRequestId" value={cr.id} />
                         <input type="hidden" name="decision" value="approve" />
-                        <Button type="submit" size="sm">
-                          Approve
+                        <Button type="submit" size="sm" className="font-mono">
+                          approve
                         </Button>
                       </form>
                       <form action={respondToChangeRequest}>
                         <input type="hidden" name="changeRequestId" value={cr.id} />
                         <input type="hidden" name="decision" value="decline" />
-                        <Button type="submit" variant="secondary" size="sm">
-                          Decline
+                        <Button type="submit" variant="secondary" size="sm" className="font-mono">
+                          decline
                         </Button>
                       </form>
                     </div>
@@ -366,7 +366,7 @@ export default async function AgreementDetailPage({
             </ul>
           )}
           <details className="text-sm">
-            <summary className="cursor-pointer text-brand-600 underline">Request a change</summary>
+            <summary className="cursor-pointer font-mono text-brand-600 underline">request_a_change</summary>
             <form action={requestChange} className="mt-3 space-y-3 rounded-md border border-dashed p-4">
               <input type="hidden" name="agreementId" value={agreement.id} />
               <div>
@@ -399,8 +399,8 @@ export default async function AgreementDetailPage({
                   />
                 </div>
               </div>
-              <Button type="submit" variant="secondary" size="sm">
-                Submit request
+              <Button type="submit" variant="secondary" size="sm" className="font-mono">
+                submit_request
               </Button>
             </form>
           </details>
@@ -409,7 +409,7 @@ export default async function AgreementDetailPage({
 
       {isDeveloper && agreement.status === "active" && !developerStripeReady && (
         <form action={connectStripeAccount} className="mb-4">
-          <Button type="submit">Connect Stripe to receive payments</Button>
+          <Button type="submit" className="font-mono">connect_stripe</Button>
         </form>
       )}
 
@@ -419,8 +419,8 @@ export default async function AgreementDetailPage({
             Every milestone is paid — nothing left outstanding on this agreement.
           </p>
           <form action={markAgreementCompleted.bind(null, agreement.id)}>
-            <Button type="submit" size="sm">
-              Mark completed
+            <Button type="submit" size="sm" className="font-mono">
+              mark_completed
             </Button>
           </form>
         </div>
@@ -432,8 +432,8 @@ export default async function AgreementDetailPage({
             Active — both parties have accepted.
           </p>
           <form action={markAgreementCompleted.bind(null, agreement.id)}>
-            <Button type="submit" variant="ghost" size="sm" className="p-0">
-              Mark as completed
+            <Button type="submit" variant="ghost" size="sm" className="p-0 font-mono">
+              mark_completed
             </Button>
           </form>
         </div>
@@ -441,7 +441,7 @@ export default async function AgreementDetailPage({
 
       {agreement.status === "completed" && (
         <div className="mb-8">
-          <h2 className="mb-3 text-sm font-medium text-neutral-500">Reviews</h2>
+          <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-neutral-500">{"// reviews"}</h2>
           {theirReview && (
             <div className="mb-3 rounded-card border border-neutral-200 bg-white p-3 text-sm shadow-card">
               <p className="mb-1 font-medium text-amber-500">
@@ -472,8 +472,8 @@ export default async function AgreementDetailPage({
                 rows={3}
                 className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
               />
-              <Button type="submit" size="sm">
-                Submit review
+              <Button type="submit" size="sm" className="font-mono">
+                submit_review
               </Button>
             </form>
           )}
@@ -487,7 +487,7 @@ export default async function AgreementDetailPage({
           </p>
         ) : (
           <form action={acceptAgreement.bind(null, agreement.id)}>
-            <Button type="submit">Accept agreement</Button>
+            <Button type="submit" className="font-mono">accept_agreement</Button>
           </form>
         )
       )}
@@ -500,7 +500,7 @@ export default async function AgreementDetailPage({
 
       {(agreement.status === "active" || agreement.status === "completed") && (
         <details className="mt-8 text-sm">
-          <summary className="cursor-pointer text-neutral-400 underline">Open a dispute</summary>
+          <summary className="cursor-pointer font-mono text-neutral-400 underline">open_a_dispute</summary>
           <form action={openDispute} className="mt-3 space-y-3 rounded-md border border-dashed p-4">
             <input type="hidden" name="agreementId" value={agreement.id} />
             <div>
@@ -521,8 +521,8 @@ export default async function AgreementDetailPage({
                 className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
               />
             </div>
-            <Button type="submit" variant="secondary" size="sm">
-              Open dispute
+            <Button type="submit" variant="secondary" size="sm" className="font-mono">
+              open_dispute
             </Button>
           </form>
         </details>

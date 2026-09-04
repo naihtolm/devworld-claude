@@ -34,11 +34,11 @@ export async function NotificationBell({ userId }: { userId: string }) {
       </summary>
       <div className="absolute right-0 z-10 mt-2 w-80 rounded-card border border-neutral-200 bg-white shadow-popover">
         <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5">
-          <span className="text-sm font-medium">Notifications</span>
+          <span className="font-mono text-sm font-medium">notifications</span>
           {unreadCount > 0 && (
             <form action={markAllAsRead}>
-              <button type="submit" className="text-xs text-brand-600 underline">
-                Mark all read
+              <button type="submit" className="font-mono text-xs text-brand-600 underline">
+                mark_all_read
               </button>
             </form>
           )}
@@ -66,9 +66,9 @@ export async function NotificationBell({ userId }: { userId: string }) {
         )}
         <Link
           href="/notifications"
-          className="block border-t border-neutral-100 px-4 py-2 text-center text-xs text-brand-600 hover:bg-neutral-200"
+          className="block border-t border-neutral-100 px-4 py-2 text-center font-mono text-xs text-brand-600 hover:bg-neutral-200"
         >
-          View all
+          view_all →
         </Link>
       </div>
     </details>

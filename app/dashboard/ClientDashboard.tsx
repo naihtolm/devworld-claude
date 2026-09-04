@@ -34,7 +34,7 @@ export async function ClientDashboard({ userId }: { userId: string }) {
           <p className="mx-auto mb-6 max-w-md text-neutral-600">
             Describe what you need built — developers who match your skills and budget will send proposals.
           </p>
-          <LinkButton href="/projects/new">Post a project</LinkButton>
+          <LinkButton href="/projects/new">+ post_a_project</LinkButton>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {HOW_IT_WORKS.map((step, i) => (
@@ -52,22 +52,24 @@ export async function ClientDashboard({ userId }: { userId: string }) {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-h1">My Projects</h1>
+        <h1 className="font-mono text-h1">
+          <span className="text-brand-600">$</span> my_projects
+        </h1>
         <LinkButton href="/projects/new" size="sm">
-          Post a project
+          + post_project
         </LinkButton>
       </div>
 
       <dl className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Total projects", value: totalProjects },
-          { label: "Published", value: activeProjects },
-          { label: "Proposals received", value: totalProposals },
-          { label: "Completed", value: completedProjects },
+          { label: "total", value: totalProjects },
+          { label: "published", value: activeProjects },
+          { label: "proposals", value: totalProposals },
+          { label: "completed", value: completedProjects },
         ].map((stat) => (
           <Card key={stat.label}>
-            <dt className="text-xs text-neutral-500">{stat.label}</dt>
-            <dd className="text-2xl font-semibold text-brand-600 tabular-nums">{stat.value}</dd>
+            <dt className="font-mono text-xs text-neutral-500">{stat.label}</dt>
+            <dd className="font-mono text-2xl font-semibold text-brand-600 tabular-nums">{stat.value}</dd>
           </Card>
         ))}
       </dl>
@@ -82,10 +84,10 @@ export async function ClientDashboard({ userId }: { userId: string }) {
                 </Link>
                 <StatusBadge status={project.status} />
               </div>
-              <div className="flex items-center gap-4 text-sm text-neutral-500">
+              <div className="flex items-center gap-4 font-mono text-sm text-neutral-500">
                 {project.status === "draft" ? (
                   <Link href={`/projects/${project.id}/edit`} className="text-brand-600 underline">
-                    Finish &amp; publish
+                    finish_and_publish →
                   </Link>
                 ) : (
                   <>
@@ -93,7 +95,7 @@ export async function ClientDashboard({ userId }: { userId: string }) {
                       {proposalCount} proposal{proposalCount === 1 ? "" : "s"}
                     </span>
                     <Link href={`/projects/${project.id}/proposals`} className="text-brand-600 underline">
-                      View proposals
+                      view_proposals →
                     </Link>
                   </>
                 )}

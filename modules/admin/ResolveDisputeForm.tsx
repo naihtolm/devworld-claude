@@ -85,8 +85,8 @@ export function ResolveDisputeForm({
           />
         </div>
 
-        <Button type="submit" disabled={pending}>
-          Resolve dispute
+        <Button type="submit" disabled={pending} className="font-mono">
+          resolve_dispute
         </Button>
       </form>
 

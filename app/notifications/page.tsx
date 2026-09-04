@@ -32,11 +32,13 @@ export default async function NotificationsPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-h1">Notifications</h1>
+        <h1 className="font-mono text-h1">
+          <span className="text-brand-600">$</span> notifications
+        </h1>
         {hasUnread && (
           <form action={markAllAsRead}>
-            <Button type="submit" variant="secondary" size="sm">
-              Mark all read
+            <Button type="submit" variant="secondary" size="sm" className="font-mono">
+              mark_all_read
             </Button>
           </form>
         )}

@@ -62,23 +62,23 @@ export default async function DisputeDetailPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link href="/admin" className="mb-6 inline-block text-sm text-neutral-500 underline">
-        ← All disputes
+      <Link href="/admin" className="mb-6 inline-block font-mono text-sm text-neutral-500 underline">
+        ← all_disputes
       </Link>
 
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-h1">{dispute.reason}</h1>
+        <h1 className="font-mono text-h1">{dispute.reason}</h1>
         <StatusBadge status={dispute.status} />
       </div>
 
       {dispute.description && <p className="mb-6 whitespace-pre-wrap text-neutral-700">{dispute.description}</p>}
 
-      <div className="mb-6 rounded-card border border-neutral-200 bg-white p-4 text-sm shadow-card">
+      <div className="mb-6 rounded-card border border-neutral-200 bg-white p-4 font-mono text-sm shadow-card">
         <p className="mb-1">
-          <span className="text-neutral-500">Opened by:</span> {openedByUser?.email}
+          <span className="text-neutral-500">opened_by:</span> {openedByUser?.email}
         </p>
         <p className="mb-1">
-          <span className="text-neutral-500">Project:</span>{" "}
+          <span className="text-neutral-500">project:</span>{" "}
           {project ? (
             <Link href={`/projects/${project.id}`} className="text-brand-600 underline">
               {project.title}
@@ -88,7 +88,7 @@ export default async function DisputeDetailPage({
           )}
         </p>
         <p className="mb-1">
-          <span className="text-neutral-500">Agreement:</span>{" "}
+          <span className="text-neutral-500">agreement:</span>{" "}
           {agreement ? (
             <Link href={`/agreements/${agreement.id}`} className="text-brand-600 underline">
               {agreement.id}
@@ -99,13 +99,13 @@ export default async function DisputeDetailPage({
         </p>
         {milestone && (
           <p>
-            <span className="text-neutral-500">Milestone:</span> {milestone.title} (${milestone.amount})
+            <span className="text-neutral-500">milestone:</span> {milestone.title} (${milestone.amount})
           </p>
         )}
       </div>
 
       <div className="mb-8">
-        <h2 className="mb-2 text-sm font-medium text-neutral-500">Message history</h2>
+        <h2 className="mb-2 font-mono text-xs uppercase tracking-wider text-neutral-500">{"// message_history"}</h2>
         {threadWithNames.length === 0 ? (
           <p className="text-sm text-neutral-400">No messages found.</p>
         ) : (
@@ -124,7 +124,7 @@ export default async function DisputeDetailPage({
 
       {dispute.status === "resolved" || dispute.status === "closed" ? (
         <div className="rounded-card border border-[rgba(52,211,153,0.25)] bg-[rgba(52,211,153,0.08)] px-4 py-3 text-sm text-[#6EE7B7]">
-          <p className="mb-1 font-medium">Resolution</p>
+          <p className="mb-1 font-mono font-medium">resolution</p>
           <p>{dispute.resolution}</p>
         </div>
       ) : (

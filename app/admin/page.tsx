@@ -28,9 +28,11 @@ export default async function AdminDashboard() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-h1">Admin — Disputes</h1>
-        <Link href="/admin/reports" className="text-sm text-brand-600 underline">
-          Reports →
+        <h1 className="font-mono text-h1">
+          <span className="text-brand-600">$</span> admin/disputes
+        </h1>
+        <Link href="/admin/reports" className="font-mono text-sm text-brand-600 underline">
+          reports →
         </Link>
       </div>
 

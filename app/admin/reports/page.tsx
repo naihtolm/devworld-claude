@@ -27,7 +27,9 @@ export default async function AdminReportsPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="mb-6 text-h1">Admin — Reports</h1>
+      <h1 className="mb-6 font-mono text-h1">
+        <span className="text-brand-600">$</span> admin/reports
+      </h1>
 
       {rows.length === 0 ? (
         <p className="text-neutral-500">No reports.</p>
@@ -52,14 +54,14 @@ export default async function AdminReportsPage() {
                       placeholder="Notes (optional)"
                       className="min-w-[10rem] flex-1 rounded-md border border-neutral-300 px-2 py-1 text-xs"
                     />
-                    <Button type="submit" name="decision" value="dismissed" variant="secondary" size="sm">
-                      Dismiss
+                    <Button type="submit" name="decision" value="dismissed" variant="secondary" size="sm" className="font-mono">
+                      dismiss
                     </Button>
-                    <Button type="submit" name="decision" value="reviewed" variant="secondary" size="sm">
-                      Mark reviewed
+                    <Button type="submit" name="decision" value="reviewed" variant="secondary" size="sm" className="font-mono">
+                      mark_reviewed
                     </Button>
-                    <Button type="submit" name="decision" value="actioned" size="sm">
-                      Take action
+                    <Button type="submit" name="decision" value="actioned" size="sm" className="font-mono">
+                      take_action
                     </Button>
                   </form>
                 )}
