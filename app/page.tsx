@@ -4,6 +4,8 @@ import { db } from "@/db";
 import { projects, developerProfiles, agreements } from "@/db/schema";
 import { CATEGORIES } from "@/modules/marketplace/categories";
 import { LinkCard } from "@/modules/ui/Card";
+import { getPlatformTrustSummary, getFeaturedReviews, shouldShowTrustSection, trustSectionSubcopy } from "@/modules/reviews/platformTrust";
+import { TrustSection } from "@/modules/marketplace/TrustSection";
 
 // Live counts, not something to freeze at build time — also sidesteps
 // Next.js attempting to statically prerender this against the database
@@ -38,6 +40,10 @@ export default async function HomePage() {
     .select({ completed: count() })
     .from(agreements)
     .where(eq(agreements.status, "completed"));
+  const trustSummary = await getPlatformTrustSummary();
+  const featuredReviews = shouldShowTrustSection(trustSummary.totalReviews)
+    ? await getFeaturedReviews(3)
+    : [];
   const categoryCounts = await db
     .select({ category: projects.category, count: count() })
     .from(projects)
@@ -115,6 +121,12 @@ export default async function HomePage() {
           </div>
         </dl>
       </div>
+
+      <TrustSection
+        summary={trustSummary}
+        featured={featuredReviews}
+        subcopy={trustSectionSubcopy(trustSummary.totalReviews)}
+      />
 
       <div className="mx-auto max-w-5xl px-6 pb-16">
         <h2 className="mb-4 font-mono text-xs uppercase tracking-wider text-neutral-500">
