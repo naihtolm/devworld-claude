@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { count, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
-import { projects, developerProfiles, agreements } from "@/db/schema";
+import { projects } from "@/db/schema";
 import { CATEGORIES } from "@/modules/marketplace/categories";
 import { LinkCard } from "@/modules/ui/Card";
-import { getPlatformTrustSummary, getFeaturedReviews, shouldShowTrustSection, trustSectionSubcopy } from "@/modules/reviews/platformTrust";
+import { getHomepageStats } from "@/modules/marketplace/homepageStats";
+import { getFeaturedReviews, shouldShowTrustSection, trustSectionSubcopy } from "@/modules/reviews/platformTrust";
 import { TrustSection } from "@/modules/marketplace/TrustSection";
 import { getRecentCompletedWork } from "@/modules/marketplace/spotlight";
 import { SpotlightSection } from "@/modules/marketplace/SpotlightSection";
@@ -33,20 +34,15 @@ export default async function HomePage() {
   // (max: 1), and firing several queries at once against a fresh serverless
   // connection here reproducibly hung in production (Vercel) even though it
   // worked locally; awaiting one at a time is the tradeoff that avoids it.
-  const [{ activeProjects }] = await db
-    .select({ activeProjects: count() })
-    .from(projects)
-    .where(eq(projects.status, "published"));
-  const [{ developers }] = await db.select({ developers: count() }).from(developerProfiles);
-  const [{ completed }] = await db
-    .select({ completed: count() })
-    .from(agreements)
-    .where(eq(agreements.status, "completed"));
-  const trustSummary = await getPlatformTrustSummary();
-  const featuredReviews = shouldShowTrustSection(trustSummary.totalReviews)
+  // getHomepageStats itself is one round trip, not five — see its comment.
+  const stats = await getHomepageStats();
+  const { activeProjects, developers, completed } = stats;
+  const featuredReviews = shouldShowTrustSection(stats.totalReviews)
     ? await getFeaturedReviews(3)
     : [];
-  const recentCompletedWork = await getRecentCompletedWork(3);
+  // Skip the query entirely when there's nothing completed yet — no point
+  // spending a round trip on a join that can only come back empty.
+  const recentCompletedWork = stats.completed > 0 ? await getRecentCompletedWork(3) : [];
   const categoryCounts = await db
     .select({ category: projects.category, count: count() })
     .from(projects)
@@ -126,9 +122,9 @@ export default async function HomePage() {
       </div>
 
       <TrustSection
-        summary={trustSummary}
+        summary={{ totalReviews: stats.totalReviews, averageRating: stats.averageRating }}
         featured={featuredReviews}
-        subcopy={trustSectionSubcopy(trustSummary.totalReviews)}
+        subcopy={trustSectionSubcopy(stats.totalReviews)}
       />
 
       <SpotlightSection recentWork={recentCompletedWork} />
