@@ -14,6 +14,7 @@ import { ToastProvider } from "@/modules/ui/Toast";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import { BottomTabBar } from "@/modules/ui/BottomTabBar";
 import { MobileMenuSheet } from "@/modules/ui/MobileMenuSheet";
+import { Footer } from "@/modules/ui/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -206,7 +207,10 @@ export default async function RootLayout({
             {/* Bottom padding keeps page content clear of the fixed tab
                 bar — only applies when it's actually rendered (signed in,
                 mobile). */}
-            <div className={dbUserId ? "pb-16 sm:pb-0" : ""}>{children}</div>
+            <div className={dbUserId ? "pb-16 sm:pb-0" : ""}>
+              {children}
+              <Footer />
+            </div>
 
             {dbUserId && (
               <BottomTabBar homeHref={homeHref} unreadNotifications={unreadNotifications}>
