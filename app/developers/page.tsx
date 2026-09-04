@@ -171,6 +171,7 @@ export default async function DevelopersPage({
                     {profile.headline && <p className="text-sm text-neutral-600">{profile.headline}</p>}
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
                       {profile.hourlyRate && <span>${profile.hourlyRate}/hr</span>}
+                      {profile.yearsExperience !== null && <span>{profile.yearsExperience}y exp</span>}
                       <span className="capitalize">{profile.availability}</span>
                       {skillNames.map((s) => (
                         <span key={s} className="rounded-card border border-neutral-300 px-2 py-0.5 font-medium text-neutral-600">
