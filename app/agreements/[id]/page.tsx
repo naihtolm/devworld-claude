@@ -15,6 +15,7 @@ import { Avatar } from "@/modules/profiles/Avatar";
 import { StatusBadge } from "@/modules/ui/StatusBadge";
 import { StatusTimeline } from "@/modules/ui/StatusTimeline";
 import { Button } from "@/modules/ui/Button";
+import { TourAutoStart, TourReplayButton } from "@/modules/tours/TourTrigger";
 
 export default async function AgreementDetailPage({
   params,
@@ -73,6 +74,15 @@ export default async function AgreementDetailPage({
     agreementMilestones.length > 0 && agreementMilestones.every((m) => m.status === "paid");
   const myAcceptedAt = isClient ? agreement.clientAcceptedAt : agreement.developerAcceptedAt;
   const developerStripeReady = developer?.stripeOnboardingComplete ?? false;
+
+  // The tour only makes sense while there's an actual "fund this" button on
+  // the page to point at — a milestone's status is exclusive (pending,
+  // funded, submitted, ...), so only ever one row can show that button at a
+  // time. Gate both the auto-start and the replay trigger to that moment
+  // rather than showing a tour with nothing live to spotlight.
+  const firstFundableMilestoneIndex = agreementMilestones.findIndex(
+    (m) => isClient && agreement.status === "active" && m.status === "pending" && developerStripeReady
+  );
 
   const hourlyInvoices =
     agreement.budgetType === "hourly"
@@ -169,14 +179,17 @@ export default async function AgreementDetailPage({
       <div className="mb-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-mono text-xs uppercase tracking-wider text-neutral-500">{"// milestones"}</h2>
+          {firstFundableMilestoneIndex !== -1 && <TourReplayButton tourId="fund-a-milestone" />}
         </div>
+        {firstFundableMilestoneIndex !== -1 && <TourAutoStart tourId="fund-a-milestone" />}
         {agreementMilestones.length === 0 ? (
           <p className="text-sm text-neutral-400">No milestones yet.</p>
         ) : (
           <ul className="mb-4 space-y-2">
-            {agreementMilestones.map((m) => (
+            {agreementMilestones.map((m, i) => (
               <li
                 key={m.id}
+                data-tour={i === firstFundableMilestoneIndex ? "milestone-row" : undefined}
                 className="flex items-center justify-between rounded-card border border-neutral-200 bg-white p-3 text-sm shadow-card"
               >
                 <div>
@@ -187,7 +200,7 @@ export default async function AgreementDetailPage({
                   <p className="mb-1 font-medium">${m.amount}</p>
                   {isClient && agreement.status === "active" && m.status === "pending" && (
                     developerStripeReady ? (
-                      <form action={fundMilestone.bind(null, m.id)}>
+                      <form action={fundMilestone.bind(null, m.id)} data-tour={i === firstFundableMilestoneIndex ? "fund-milestone-button" : undefined}>
                         <Button type="submit" size="sm" className="font-mono">
                           fund_milestone
                         </Button>

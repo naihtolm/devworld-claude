@@ -83,6 +83,32 @@ export const TOURS = {
       },
     ],
   },
+  "onboarding-role": {
+    id: "onboarding-role",
+    steps: [
+      {
+        target: "onboarding-role-choice",
+        title: "This isn't permanent",
+        body: "Pick whichever fits why you're here today — you can add the other role from your account later without starting over.",
+      },
+    ],
+  },
+  "fund-a-milestone": {
+    id: "fund-a-milestone",
+    steps: [
+      {
+        target: "milestone-row",
+        title: "Funding moves it to escrow",
+        body: "The milestone amount, plus a platform fee, moves into escrow — the developer can't withdraw it until you approve their submitted work.",
+      },
+      {
+        target: "fund-milestone-button",
+        title: "This doesn't pay the developer yet",
+        body: "Funding just makes the money available for them to start on. They get paid once you approve the work they submit.",
+        placement: "top",
+      },
+    ],
+  },
 } as const satisfies Record<string, TourDefinition>;
 
 export type TourId = keyof typeof TOURS;

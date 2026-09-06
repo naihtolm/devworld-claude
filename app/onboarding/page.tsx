@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { chooseDeveloper, chooseHiring } from "@/modules/profiles/actions";
 import { Button } from "@/modules/ui/Button";
+import { TourAutoStart } from "@/modules/tours/TourTrigger";
 
 export default async function OnboardingPage() {
   const { userId: authProviderId } = await auth();
@@ -22,6 +23,7 @@ export default async function OnboardingPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-8 px-6 text-center">
+      <TourAutoStart tourId="onboarding-role" />
       <h1 className="text-3xl font-semibold tracking-tight">
         Welcome to Devworld
       </h1>
@@ -29,7 +31,7 @@ export default async function OnboardingPage() {
         Are you looking to hire, or looking for work? You can always add the
         other later.
       </p>
-      <div className="flex gap-4">
+      <div className="flex gap-4" data-tour="onboarding-role-choice">
         <form action={chooseHiring}>
           <Button type="submit">I&rsquo;m hiring</Button>
         </form>
