@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { companyMemberships, companies } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { CreateProjectForm } from "@/modules/marketplace/CreateProjectForm";
+import { TourAutoStart, TourReplayButton } from "@/modules/tours/TourTrigger";
 
 export default async function NewProjectPage({
   searchParams,
@@ -27,7 +28,11 @@ export default async function NewProjectPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-2 text-h1">Post a project</h1>
+      <TourAutoStart tourId="post-a-project" />
+      <div className="mb-2 flex items-center justify-between">
+        <h1 className="text-h1">Post a project</h1>
+        <TourReplayButton tourId="post-a-project" />
+      </div>
       <p className="mb-8 text-sm text-neutral-500">
         Describe what you need built — developers will be able to browse and
         submit proposals once it&rsquo;s published.

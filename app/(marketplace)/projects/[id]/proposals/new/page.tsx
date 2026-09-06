@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
 import { SubmitProposalForm } from "@/modules/proposals/SubmitProposalForm";
+import { TourAutoStart, TourReplayButton } from "@/modules/tours/TourTrigger";
 
 export default async function NewProposalPage({
   params,
@@ -28,7 +29,11 @@ export default async function NewProposalPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-2 text-h1">Submit a proposal</h1>
+      <TourAutoStart tourId="submit-a-proposal" />
+      <div className="mb-2 flex items-center justify-between">
+        <h1 className="text-h1">Submit a proposal</h1>
+        <TourReplayButton tourId="submit-a-proposal" />
+      </div>
       <p className="mb-8 text-sm text-neutral-500">for &ldquo;{project.title}&rdquo;</p>
       <SubmitProposalForm projectId={project.id} defaultRateType={project.budgetType} />
     </main>

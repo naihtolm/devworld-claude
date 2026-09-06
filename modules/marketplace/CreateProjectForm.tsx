@@ -73,7 +73,7 @@ export function CreateProjectForm({
         </div>
       )}
 
-      <div>
+      <div data-tour="project-title">
         <label className="mb-1 block text-sm font-medium">Title</label>
         <input
           name="title"
@@ -86,7 +86,7 @@ export function CreateProjectForm({
         />
       </div>
 
-      <div>
+      <div data-tour="project-description">
         <label className="mb-1 block text-sm font-medium">Description</label>
         <textarea
           name="description"
@@ -99,7 +99,7 @@ export function CreateProjectForm({
         />
       </div>
 
-      <div>
+      <div data-tour="project-category">
         <label className="mb-1 block text-sm font-medium">Category</label>
         <select
           name="category"
@@ -164,7 +164,7 @@ export function CreateProjectForm({
         )}
       </div>
 
-      <div>
+      <div data-tour="project-budget-type">
         <label className="mb-1 block text-sm font-medium">Budget type</label>
         <div className="flex gap-4 text-sm">
           {(["fixed", "milestone", "hourly"] as const).map((type) => (
@@ -182,7 +182,7 @@ export function CreateProjectForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4" data-tour="project-budget-range">
         <div>
           <label className="mb-1 block text-sm font-medium">
             {budgetType === "hourly" ? "Min rate ($/hr)" : "Budget min ($)"}
@@ -244,7 +244,7 @@ export function CreateProjectForm({
         />
       </div>
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-3 pt-2" data-tour="project-publish">
         <Button type="submit" name="intent" value="draft" disabled={pending} variant="secondary">
           Save as draft
         </Button>

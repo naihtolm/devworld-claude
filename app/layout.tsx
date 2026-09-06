@@ -11,6 +11,7 @@ import { ensureCurrentUser } from "@/modules/auth/user";
 import { getUserRoles } from "@/modules/profiles/roles";
 import { getUnreadCount } from "@/modules/notifications/actions";
 import { ToastProvider } from "@/modules/ui/Toast";
+import { TourProvider } from "@/modules/tours/TourProvider";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import { BottomTabBar } from "@/modules/ui/BottomTabBar";
 import { MobileMenuSheet } from "@/modules/ui/MobileMenuSheet";
@@ -113,6 +114,7 @@ export default async function RootLayout({
       <html lang="en">
         <body>
           <ToastProvider>
+          <TourProvider>
             <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-6 py-4">
               <Link href="/" className="flex items-center gap-2.5 font-mono text-base font-bold tracking-tight">
                 <span className="h-2 w-2 bg-brand-600" />
@@ -217,6 +219,7 @@ export default async function RootLayout({
                 {accountMenuLinks}
               </BottomTabBar>
             )}
+          </TourProvider>
           </ToastProvider>
         </body>
       </html>
