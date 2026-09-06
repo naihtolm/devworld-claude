@@ -1,6 +1,7 @@
-import { PLATFORM_FEE_BPS } from "@/modules/payments/stripe";
+import { CLIENT_FEE_BPS, DEVELOPER_FEE_BPS } from "@/modules/payments/stripe";
 
-const feePercent = PLATFORM_FEE_BPS / 100;
+const clientFeePercent = CLIENT_FEE_BPS / 100;
+const developerFeePercent = DEVELOPER_FEE_BPS / 100;
 
 const FAQ_GROUPS: { heading: string; items: { q: string; a: string }[] }[] = [
   {
@@ -59,7 +60,7 @@ const FAQ_GROUPS: { heading: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "What's the platform fee?",
-        a: `Devworld takes a ${feePercent}% fee, deducted from the developer's payout when a milestone or hourly invoice is paid out — see the Pricing page for a worked example.`,
+        a: `Devworld splits its fee across both sides: a ${clientFeePercent}% fee added on top when a client funds a milestone or pays an hourly invoice, and a ${developerFeePercent}% fee deducted from the developer's payout — see the Pricing page for a worked example.`,
       },
       {
         q: "Is there a fee to post a project or send a proposal?",

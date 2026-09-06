@@ -24,10 +24,10 @@ describe("centsToDollarString", () => {
 });
 
 describe("calculateFeeCents", () => {
-  it("computes a 10% platform fee (1000 bps)", () => {
-    // The real-world case this session's manual verification caught:
-    // a $500 milestone at the app's actual 10% rate.
-    expect(calculateFeeCents("500", 1000)).toBe(5000); // $50.00
+  it("computes the app's actual developer/client fee (275 bps = 2.75%)", () => {
+    // The real-world case: a $500 milestone at the app's actual rate —
+    // see modules/payments/stripe.ts's CLIENT_FEE_BPS/DEVELOPER_FEE_BPS.
+    expect(calculateFeeCents("500", 275)).toBe(1375); // $13.75
   });
 
   it("computes other basis-point rates correctly", () => {
@@ -41,15 +41,18 @@ describe("calculateFeeCents", () => {
 
 describe("calculatePayoutCents", () => {
   it("subtracts the already-recorded platform fee from the funded amount", () => {
-    // $500 funded, $50 fee already taken at funding time -> $450 payout,
-    // matching modules/payments/actions.ts's escrow model (fund now,
-    // payout minus fee later — see approveMilestone).
-    const feeCents = calculateFeeCents("500", 1000);
-    expect(calculatePayoutCents("500", feeCents)).toBe(45000); // $450.00
+    // $500 funded, $13.75 developer-side fee already taken at funding
+    // time -> $486.25 payout, matching modules/payments/actions.ts's
+    // escrow model (fund now, payout minus fee later — see
+    // approveMilestone). Note this is the developer-side fee only — the
+    // client-side fee (also 2.75%) is a separate charge added on top at
+    // checkout, not part of this subtraction.
+    const feeCents = calculateFeeCents("500", 275);
+    expect(calculatePayoutCents("500", feeCents)).toBe(48625); // $486.25
   });
 
   it("never produces a payout larger than the funded amount", () => {
-    const feeCents = calculateFeeCents("200", 1000);
+    const feeCents = calculateFeeCents("200", 275);
     const payoutCents = calculatePayoutCents("200", feeCents);
     expect(payoutCents).toBeLessThan(dollarsToCents("200"));
   });

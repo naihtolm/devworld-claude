@@ -1,6 +1,7 @@
-import { PLATFORM_FEE_BPS } from "@/modules/payments/stripe";
+import { CLIENT_FEE_BPS, DEVELOPER_FEE_BPS } from "@/modules/payments/stripe";
 
-const feePercent = PLATFORM_FEE_BPS / 100;
+const clientFeePercent = CLIENT_FEE_BPS / 100;
+const developerFeePercent = DEVELOPER_FEE_BPS / 100;
 
 export type Guide = {
   slug: string;
@@ -77,9 +78,9 @@ export const GUIDE_GROUPS: GuideGroup[] = [
         summary: "Where your money sits, and what triggers it moving.",
         body: [
           "Once a client and developer accept an agreement, work is broken into milestones — each with its own amount, and optionally a due date. Nothing is paid out yet at this point; the agreement just defines the plan.",
-          "Before a developer starts on a milestone, the client funds it — the money moves into escrow and sits there, held by the platform rather than either party. The developer then does the work and submits it for review.",
-          "The client reviews the submission and approves it (or requests a change first, on active agreements). Approval is what releases the escrowed funds — Devworld transfers the payout to the developer, minus the platform fee.",
-          `The platform fee is ${feePercent}% and is only deducted from the developer's payout when a milestone or hourly invoice is actually paid out — there's no charge for posting a project, sending proposals, or messaging.`,
+          `Before a developer starts on a milestone, the client funds it. Checkout charges the milestone amount plus a ${clientFeePercent}% platform fee, shown as its own line item — the total moves into escrow and sits there, held by the platform rather than either party. The developer then does the work and submits it for review.`,
+          `The client reviews the submission and approves it (or requests a change first, on active agreements). Approval is what releases the escrowed funds — Devworld transfers the payout to the developer, minus a separate ${developerFeePercent}% platform fee taken on that side.`,
+          `The platform fee is split across both parties — ${clientFeePercent}% added to what the client pays, ${developerFeePercent}% deducted from what the developer receives — and only applies when a milestone or hourly invoice is actually funded; there's no charge for posting a project, sending proposals, or messaging.`,
           "For hourly agreements, the same escrow-then-release pattern applies per invoice rather than per milestone.",
         ],
       },

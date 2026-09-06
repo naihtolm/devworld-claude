@@ -18,8 +18,14 @@ export function getStripe() {
   return stripe;
 }
 
-// Platform fee taken on milestone funding, in basis points (10% here).
-export const PLATFORM_FEE_BPS = 1000;
+// Two separate fees (both 2.75%), replacing the old single 10%
+// developer-side-only fee — combined platform take is 5.5% per
+// transaction. CLIENT_FEE_BPS is charged on top at checkout (a second,
+// clearly labeled line item — see createFundingCheckout in
+// modules/payments/actions.ts); DEVELOPER_FEE_BPS is deducted from the
+// payout at approval/invoice-payment time, same mechanism as before.
+export const CLIENT_FEE_BPS = 275;
+export const DEVELOPER_FEE_BPS = 275;
 
 // Escrow model: funding moves money to the platform's own Stripe balance
 // (see modules/payments/actions.ts's createFundingCheckout), and this is
@@ -30,16 +36,16 @@ export const PLATFORM_FEE_BPS = 1000;
 export async function payoutToDeveloper({
   developerStripeAccountId,
   amount,
-  platformFeeCents,
+  developerFeeCents,
   transferGroup,
 }: {
   developerStripeAccountId: string;
   amount: string;
-  platformFeeCents: number;
+  developerFeeCents: number;
   transferGroup: string;
 }) {
   const stripe = getStripe();
-  const payoutCents = calculatePayoutCents(amount, platformFeeCents);
+  const payoutCents = calculatePayoutCents(amount, developerFeeCents);
 
   const transfer = await stripe.transfers.create({
     amount: payoutCents,

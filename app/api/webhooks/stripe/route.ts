@@ -33,8 +33,21 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
       const milestoneId = session.metadata?.milestoneId;
       const paymentId = session.metadata?.paymentId;
+      const clientFeePaymentId = session.metadata?.clientFeePaymentId;
       const paymentIntentId =
         typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+
+      // The client-side platform fee is its own payment row (type:
+      // "platform_fee" — see modules/payments/actions.ts), charged as a
+      // second Checkout line item alongside the milestone/invoice amount.
+      // Same checkout session, so it succeeds or fails together with
+      // whichever branch below handles the milestone/invoice itself.
+      if (clientFeePaymentId) {
+        await db
+          .update(payments)
+          .set({ status: "succeeded", stripePaymentIntentId: paymentIntentId, updatedAt: new Date() })
+          .where(eq(payments.id, clientFeePaymentId));
+      }
 
       if (milestoneId) {
         await db
@@ -66,11 +79,11 @@ export async function POST(req: Request) {
             : [];
 
           if (developerProfile?.stripeAccountId) {
-            const platformFeeCents = dollarsToCents(payment.platformFeeAmount ?? 0);
+            const developerFeeCents = dollarsToCents(payment.platformFeeAmount ?? 0);
             const { transfer, payoutAmount } = await payoutToDeveloper({
               developerStripeAccountId: developerProfile.stripeAccountId,
               amount: payment.amount,
-              platformFeeCents,
+              developerFeeCents,
               transferGroup: `hourly_invoice_${paymentId}`,
             });
 

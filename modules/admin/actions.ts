@@ -135,11 +135,11 @@ export async function resolveDispute(formData: FormData) {
         throw new Error("The developer's Stripe account is missing.");
       }
 
-      const platformFeeCents = dollarsToCents(fundingPayment.platformFeeAmount ?? 0);
+      const developerFeeCents = dollarsToCents(fundingPayment.platformFeeAmount ?? 0);
       const { transfer, payoutAmount } = await payoutToDeveloper({
         developerStripeAccountId: devProfile.stripeAccountId,
         amount: milestone.amount,
-        platformFeeCents,
+        developerFeeCents,
         transferGroup: `dispute_${dispute.id}`,
       });
 
@@ -163,6 +163,20 @@ export async function resolveDispute(formData: FormData) {
         throw new Error("No payment intent recorded for this milestone's funding.");
       }
       const refund = await stripe.refunds.create({ payment_intent: fundingPayment.stripePaymentIntentId });
+
+      // The client-side platform fee (type: "platform_fee") shares the same
+      // Checkout session/PaymentIntent as the funding payment — see
+      // modules/payments/actions.ts's fundMilestone — so the refund above
+      // already returns it along with the milestone amount. Record both:
+      // a plain refund of the milestone, and this fee row marked refunded
+      // so the ledger isn't left showing it as still "pending".
+      const [feePayment] = await db
+        .select()
+        .from(payments)
+        .where(and(eq(payments.milestoneId, dispute.milestoneId), eq(payments.type, "platform_fee")));
+      if (feePayment && feePayment.status === "pending") {
+        await db.update(payments).set({ status: "refunded", updatedAt: new Date() }).where(eq(payments.id, feePayment.id));
+      }
 
       // No "refunded" state exists in milestone_status — the payments
       // ledger (append-only by design, see db/schema.ts) is the actual

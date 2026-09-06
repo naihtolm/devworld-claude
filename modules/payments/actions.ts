@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { agreements, developerProfiles, milestones, payments, projects } from "@/db/schema";
 import { ensureCurrentUser } from "@/modules/auth/user";
-import { getStripe, PLATFORM_FEE_BPS, payoutToDeveloper } from "@/modules/payments/stripe";
+import { getStripe, CLIENT_FEE_BPS, DEVELOPER_FEE_BPS, payoutToDeveloper } from "@/modules/payments/stripe";
 import { dollarsToCents, calculateFeeCents, centsToDollarString } from "@/modules/payments/fees";
 import { createNotification } from "@/modules/notifications/create";
 
@@ -89,19 +89,20 @@ export async function connectStripeAccount() {
 async function createFundingCheckout({
   agreementId,
   amount,
+  clientFeeCents,
   description,
   metadata,
   origin,
 }: {
   agreementId: string;
   amount: string;
+  clientFeeCents: number;
   description: string;
   metadata: Record<string, string>;
   origin: string;
 }) {
   const stripe = getStripe();
   const amountCents = dollarsToCents(amount);
-  const platformFeeCents = calculateFeeCents(amount, PLATFORM_FEE_BPS);
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -114,13 +115,24 @@ async function createFundingCheckout({
         },
         quantity: 1,
       },
+      // Charged on top, as its own line item — the client sees exactly
+      // what the platform fee is rather than it being folded silently
+      // into the milestone/invoice amount.
+      {
+        price_data: {
+          currency: "usd",
+          product_data: { name: `Platform fee (${CLIENT_FEE_BPS / 100}%)` },
+          unit_amount: clientFeeCents,
+        },
+        quantity: 1,
+      },
     ],
     metadata,
     success_url: `${origin}/agreements/${agreementId}?funded=1`,
     cancel_url: `${origin}/agreements/${agreementId}`,
   });
 
-  return { session, platformFeeCents };
+  return session;
 }
 
 export async function fundMilestone(milestoneId: string) {
@@ -153,11 +165,30 @@ export async function fundMilestone(milestoneId: string) {
     throw new Error("The developer hasn't finished connecting Stripe yet.");
   }
 
-  const { session, platformFeeCents } = await createFundingCheckout({
+  const developerFeeCents = calculateFeeCents(milestone.amount, DEVELOPER_FEE_BPS);
+  const clientFeeCents = calculateFeeCents(milestone.amount, CLIENT_FEE_BPS);
+
+  // Its own payment row (type: "platform_fee"), not folded into the
+  // milestone_funding row — that row's `amount` is the milestone's actual
+  // value, and the client-side fee is a separate charge the webhook marks
+  // succeeded independently (see clientFeePaymentId below).
+  const [feePayment] = await db
+    .insert(payments)
+    .values({
+      agreementId: agreement.id,
+      milestoneId: milestone.id,
+      type: "platform_fee",
+      amount: centsToDollarString(clientFeeCents),
+      status: "pending",
+    })
+    .returning();
+
+  const session = await createFundingCheckout({
     agreementId: agreement.id,
     amount: milestone.amount,
+    clientFeeCents,
     description: `Milestone: ${milestone.title}`,
-    metadata: { milestoneId: milestone.id, agreementId: agreement.id },
+    metadata: { milestoneId: milestone.id, agreementId: agreement.id, clientFeePaymentId: feePayment.id },
     origin,
   });
 
@@ -166,7 +197,7 @@ export async function fundMilestone(milestoneId: string) {
     milestoneId: milestone.id,
     type: "milestone_funding",
     amount: milestone.amount,
-    platformFeeAmount: centsToDollarString(platformFeeCents),
+    platformFeeAmount: centsToDollarString(developerFeeCents),
     status: "pending",
   });
 
@@ -247,13 +278,13 @@ export async function approveMilestone(milestoneId: string) {
   const [fundingPayment] = await db
     .select()
     .from(payments)
-    .where(eq(payments.milestoneId, milestoneId));
-  const platformFeeCents = dollarsToCents(fundingPayment?.platformFeeAmount ?? 0);
+    .where(and(eq(payments.milestoneId, milestoneId), eq(payments.type, "milestone_funding")));
+  const developerFeeCents = dollarsToCents(fundingPayment?.platformFeeAmount ?? 0);
 
   const { transfer, payoutAmount } = await payoutToDeveloper({
     developerStripeAccountId: developerProfile.stripeAccountId,
     amount: milestone.amount,
-    platformFeeCents,
+    developerFeeCents,
     transferGroup: `milestone_${milestoneId}`,
   });
 
@@ -355,17 +386,31 @@ export async function payHourlyInvoice(paymentId: string) {
     throw new Error("The developer hasn't finished connecting Stripe yet.");
   }
 
-  const { session, platformFeeCents } = await createFundingCheckout({
+  const developerFeeCents = calculateFeeCents(payment.amount, DEVELOPER_FEE_BPS);
+  const clientFeeCents = calculateFeeCents(payment.amount, CLIENT_FEE_BPS);
+
+  const [feePayment] = await db
+    .insert(payments)
+    .values({
+      agreementId: agreement.id,
+      type: "platform_fee",
+      amount: centsToDollarString(clientFeeCents),
+      status: "pending",
+    })
+    .returning();
+
+  const session = await createFundingCheckout({
     agreementId: agreement.id,
     amount: payment.amount,
+    clientFeeCents,
     description: `Hourly invoice — ${agreement.id.slice(0, 8)}`,
-    metadata: { paymentId: payment.id, agreementId: agreement.id },
+    metadata: { paymentId: payment.id, agreementId: agreement.id, clientFeePaymentId: feePayment.id },
     origin,
   });
 
   await db
     .update(payments)
-    .set({ platformFeeAmount: centsToDollarString(platformFeeCents) })
+    .set({ platformFeeAmount: centsToDollarString(developerFeeCents) })
     .where(eq(payments.id, paymentId));
 
   redirect(session.url!);
